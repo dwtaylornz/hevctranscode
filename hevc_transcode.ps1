@@ -1,5 +1,5 @@
 # powershell 
-# github.com/dwtaylornz/hevcamdwin
+# github.com/dwtaylornz/hevctranscode
 #
 # script will continously loop - $scan_period used to control how often disk is scanned for new media
 
