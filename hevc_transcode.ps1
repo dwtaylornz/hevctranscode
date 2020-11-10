@@ -68,12 +68,14 @@ while ($true) {
             if (Select-String -pattern "h264" -InputObject $video_codec -quiet){$video_codec = "h264"} 
             if (Select-String -pattern "vc1" -InputObject $video_codec -quiet){$video_codec = "vc1"}          
             if (Select-String -pattern "mpeg2video" -InputObject $video_codec -quiet){$video_codec = "mpeg2video"}
+            if (Select-String -pattern "mpeg4" -InputObject $video_codec -quiet){$video_codec = "mpeg4"}
 
             #check video width (1920 width is more consistant for 1080p videos)
             $video_width = $null 
             $video_width = (./ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
             $video_width = $video_width.trim()
-            $video_width = $video_width.substring(0, 4)
+            $video_width = $video_width -as [Int]
+            #$video_width = $video_width.substring(0, 4)
 
             Write-Host ""
             Write-Host "Processing : $video_name"
@@ -202,19 +204,19 @@ while ($true) {
                                           
             }  
             
+            $count = $count + 1
             Write-Host "Batch : $count/$file_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " 
 
             # Update skip.txt with failed, hevc or already processed file 
             echo "$video_name" >> skip.log
-            $count = $count + 1
-
+            
             if ($run_time_current -ge $scan_period) { break }
           
         }      
               
     }
 Write-Host ""
-Write-Host "All files done, waiting 60 seconds before looping"
-sleep 60
-Write-Host ""
+$sleep_time = ($scan_period - $run_time_current)
+Write-Host "All files done, waiting $sleep_time minutes before re-scan"
+sleep $sleep_time
 }
