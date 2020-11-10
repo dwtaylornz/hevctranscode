@@ -115,7 +115,7 @@ while ($true) {
 
             #Nvidia Offload... 
             elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $hevc_offload -eq "Nvidia") { 
-                Write-Host -NoNewline "  Attempting transcode via Nvidia to HEVC (this may take some time)..."            
+                Write-Host -NoNewline "  Attempting transcode via Nvidia to 1080p HEVC (this may take some time)..."            
                 ./ffmpeg -hide_banner -v $hevc_verbose -y -i $video_path -vf scale=1920:-1 -map 0 -c:v hevc_nvenc -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE     
 
