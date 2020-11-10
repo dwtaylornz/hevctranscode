@@ -16,7 +16,7 @@ powershell script to re-encode media library videos to HEVC / H265 using ffmpeg 
 - traverses root path (scans all files in subfolders) 
 - transcodes video stream to hevc using **AMD or Nvidia /w encoder** 
 - copys all existing audio and subtitles (i.e. no conversion) 
-- works in batches (to prevent constant scanning of files) - able to set max batch size and max execution time before re-scanning disk 
+- able to set min time before re-scanning disk 
 - overwrites source with new HEVC transcode if **move_file = 1** (WARNING this is default!) 
 - checks to see if video codec is already HEVC (if so, skips)
 - checks that HEVC conversion is smaller than origanal file (99.9% of time this is true) - if larger does not overwrite and skips file 
@@ -26,6 +26,5 @@ powershell script to re-encode media library videos to HEVC / H265 using ffmpeg 
 
 ### limitations (potential todo list) 
 Deminishing effort vs reward - 
-- does not look for video specific files / extensions (assumes largest files are video) 
 - does not change media container to mkv if source is another container format
 
