@@ -1,5 +1,5 @@
 ## Reduce your media disk consumption with HEVC!
-This is a windows powershell script to re-encode media library videos to HEVC / H265 using ffmpeg on windows with GPU h/w acceleration. 
+run hevc_transcode.ps1 powershell script to re-encode media library videos to HEVC / H265 using ffmpeg on windows with GPU h/w acceleration. 
 
 ### requirements
 - ffmpeg executables for windows (includes hevc_amf) - https://ffmpeg.org/download.html
