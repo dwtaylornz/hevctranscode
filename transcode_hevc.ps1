@@ -1,11 +1,10 @@
 # powershell 
-# github.com/dwtaylornz/hevctranscode
+# github.com/dwtaylornz/hevcamdwin
 #
 # script will continously loop - batch size only used to control how often disk is scanned for new media
 
 # Variables 
 $scan_period = "240" # max minutes before doing a re-scan
-$batch_size = "1000" # max batch size before doing a re-scan 
 $move_file = 1 # set to 0 for testing
 $hevc_offload = "AMD" # set to AMD, NVIDIA or CPU
 $hevc_quality = "5" # For AMD, 0-10 (highest - lowest) 
@@ -15,15 +14,16 @@ $video_directory = "z:\videos" # path in SMB share
 $ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
 # If useing SMB it'll be mapped to z: drive 
-$smb_server = "servername or ip" # SMB server 
-$smb_share = "share" # SMB share
+$smb_enabled = "true" # Set to true to map SMB drive
+$smb_server = "server" # SMB server 
+$smb_share = "videos" # SMB share
 $smb_user = "user" # SMB username
 $smb_password = "password" # SMB password
 
 cd $ffmpeg_path
 
 #map media drive 
-while (!(test-path -PathType container $video_directory)) {
+while (!(test-path -PathType container $video_directory -AND $smb_enabled -eq "true")) {
     sleep 2
     Write-Host -NoNewline "Mapping Drive (assuming smb)... "     
     net use z: \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
@@ -39,7 +39,8 @@ while ($true) {
     # Get largest files
     Write-Host ""
     Write-Host -NoNewline "Checking all files and sizes (sorting largest to smallest)..." 
-    $videos = gci -r $video_directory | sort -descending -Property length | select Fullname, name, length
+    $videos = Get-ChildItem -r $video_directory -Include *.mkv,*.avi,*.mp4,*.ts,*.mov,*.y4m| sort -descending -Property length | select Fullname, name, length
+    $file_count = $videos.Count
     Write-Host "Done" 
 
     # Get previously skipped files
@@ -115,15 +116,15 @@ while ($true) {
 
             #Nvidia Offload... 
             elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $hevc_offload -eq "Nvidia") { 
-                Write-Host -NoNewline "  Attempting transcode via Nvidia to 1080p HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $hevc_verbose -y -i $video_path -vf scale=1920:-1 -map 0 -c:v hevc_nvenc -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                Write-Host -NoNewline "  Attempting transcode to 1080p HEVC (this may take some time)..."            
+                ./ffmpeg -hide_banner -v $hevc_verbose -y -i $video_path -vf scale=1920:-1 -map 0 -c:v hevc_nvenc -preset hq -profile:v main10 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE     
 
             }
 
             elseif ($video_codec -ne "hevc" -AND $hevc_offload -eq "Nvidia") { 
-                Write-Host -NoNewline "  Attempting transcode via Nvidia to HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $hevc_verbose -y -i $video_path -map 0 -c:v hevc_nvenc -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                Write-Host -NoNewline "  Attempting transcode to HEVC (this may take some time)..."            
+                ./ffmpeg -hide_banner -v $hevc_verbose -y -i $video_path -map 0 -c:v hevc_nvenc -preset hq -profile:v main10 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE
                 
             }
@@ -155,7 +156,7 @@ while ($true) {
             $run_time = $end_time - $run_start
             $run_time_current = $run_time.minutes + ($run_time.hours * 60)
 
-            echo "$video_name ($count/$batch_size, $run_time_current/$scan_period)" >> transcode.log            
+            echo "$video_name ($count/$file_count, $run_time_current/$scan_period)" >> transcode.log            
 
             if ($convert_error -eq 0) {          
 
@@ -216,13 +217,13 @@ while ($true) {
                                           
             }  
             
-            Write-Host "Batch : $count/$batch_size, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " 
+            Write-Host "Batch : $count/$file_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " 
 
             # Update skip.txt with failed, hevc or already processed file 
             echo "$video_name" >> skip.log
             $count = $count + 1
 
-            if ($count -ge $batch_size) { break }
+            if ($count -ge $file_count) { break }
             if ($run_time_current -ge $scan_period) { break }
           
         }      
