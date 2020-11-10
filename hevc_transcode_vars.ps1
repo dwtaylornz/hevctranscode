@@ -10,6 +10,7 @@ $ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
 # If useing SMB it'll be mapped to z: drive 
 $smb_enabled = "true" # Set to true to map SMB drive
+$smb_driveletter = "z:" # drive letter to map. Include colon. 
 $smb_server = "server" # SMB server 
 $smb_share = "share" # SMB share
 $smb_user = "user" # SMB username
