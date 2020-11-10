@@ -24,7 +24,7 @@ while ($true) {
     # Get largest files
     Write-Host ""
     Write-Host -NoNewline "Checking all video files and sizes (sorting largest to smallest)..." 
-    $videos = Get-ChildItem -r $video_directory -Include *.mkv,*.avi,*.mp4,*.ts,*.mov,*.y4m| sort -descending -Property length | select Fullname, name, length
+    $videos = Get-ChildItem -r $video_directory -Include *.mkv,*.avi,*.mp4,*.ts,*.mov,*.y4m | sort -descending -Property length | select Fullname, name, length
     $file_count = $videos.Count
     Write-Host "Done ($file_count)" 
 
@@ -79,8 +79,7 @@ while ($true) {
 
             Write-Host ""
             Write-Host "Processing : $video_name"
-            Write-Host "  Size (GB) : $video_size, Video Codec : $video_codec, Video Width : $video_width"
-                
+            Write-Host "  Size (GB) : $video_size, Video Codec : $video_codec, Video Width : $video_width"             
 
             $start_time = (GET-Date)
 
@@ -89,14 +88,14 @@ while ($true) {
             #AMD Offload...
             if ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $hevc_offload -eq "AMD") { 
                 Write-Host -NoNewline "  Attempting transcode via AMD to 1080p HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $amd_hevc_verbose -y -i $video_path -vf scale=1920:-1 -map 0 -c:v hevc_amf -quality $hevc_quality -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -vf scale=1920:-1 -map 0 -c:v hevc_amf -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE     
 
             }
 
             elseif ($video_codec -ne "hevc" -AND $hevc_offload -eq "AMD") { 
                 Write-Host -NoNewline "  Attempting transcode via AMD to HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $amd_hevc_verbose -y -i $video_path -map 0 -c:v hevc_amf -quality $hevc_quality -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -map 0 -c:v hevc_amf -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE
                 
             }
@@ -104,14 +103,14 @@ while ($true) {
             #Nvidia Offload... 
             elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $hevc_offload -eq "Nvidia") { 
                 Write-Host -NoNewline "  Attempting transcode via Nvidia to 1080p HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $amd_hevc_verbose -y -i $video_path -vf scale=1920:-1 -map 0 -c:v hevc_nvenc -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -vf scale=1920:-1 -map 0 -c:v hevc_nvenc -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE     
 
             }
 
             elseif ($video_codec -ne "hevc" -AND $hevc_offload -eq "Nvidia") { 
                 Write-Host -NoNewline "  Attempting transcode via Nvidia to HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $amd_hevc_verbose -y -i $video_path -map 0 -c:v hevc_nvenc -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -map 0 -c:v hevc_nvenc -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE
                 
             }
@@ -119,14 +118,14 @@ while ($true) {
             #CPU Offload... (evaluated last) 
             elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { 
                 Write-Host -NoNewline "  Attempting transcode to 1080p HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $amd_hevc_verbose -y -i $video_path -vf scale=1920:-1 -map 0 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -vf scale=1920:-1 -map 0 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE     
 
             }
 
             elseif ($video_codec -ne "hevc") { 
                 Write-Host -NoNewline "  Attempting transcode to HEVC (this may take some time)..."            
-                ./ffmpeg -hide_banner -v $amd_hevc_verbose -y -i $video_path -map 0 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+                ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -map 0 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE
                 
             }
