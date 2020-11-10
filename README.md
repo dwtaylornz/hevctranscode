@@ -13,10 +13,10 @@ A windows powershell script to re-encode media library videos to HEVC / H265 usi
 **It will overwrite existing source files if conversion is successfull**
 
 ### functions
-- traverses root path (scans all files in subfolders) 
+- traverses root path (scans all video files in subfolders) 
 - transcodes video stream to hevc using **AMD or Nvidia /w encoder** 
 - copys all existing audio and subtitles (i.e. no conversion) 
-- able to set min time before re-scanning disk 
+- able to set min time before re-scanning or looping script
 - overwrites source with new HEVC transcode if **move_file = 1** (WARNING this is default!) 
 - checks to see if video codec is already HEVC (if so, skips)
 - checks that HEVC conversion is smaller than origanal file (99.9% of time this is true) - if larger does not overwrite and skips file 
