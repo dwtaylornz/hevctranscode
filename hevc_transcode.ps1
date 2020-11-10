@@ -1,7 +1,7 @@
 # powershell 
 # github.com/dwtaylornz/hevcamdwin
 #
-# script will continously loop - batch size only used to control how often disk is scanned for new media
+# script will continously loop - $scan_period used to control how often disk is scanned for new media
 
 # grab variables from var file 
 . .\hevc_transcode_vars.ps1
