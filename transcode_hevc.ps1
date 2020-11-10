@@ -1,5 +1,5 @@
 # powershell 
-# github.com/dwtaylornz/hevcamdwin
+# github.com/dwtaylornz/hevctranscode
 #
 # script will continously loop - batch size only used to control how often disk is scanned for new media
 
