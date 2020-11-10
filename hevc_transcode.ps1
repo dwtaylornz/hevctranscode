@@ -209,7 +209,8 @@ while ($true) {
             }  
             
             $count = $count + 1
-            Write-Host "Batch : $count/$file_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " 
+            Write-Host "Batch : $count/$video_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " 
+            echo "Batch : $count/$video_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " >> batch.log
 
             # Update skip.txt with failed, hevc or already processed file 
             echo "$video_name" >> skip.log
@@ -220,7 +221,8 @@ while ($true) {
               
     }
 Write-Host ""
-$sleep_time = ($scan_period - $run_time_current)
+$sleep_time = ($scan_period - $run_time_current) 
 Write-Host "All files done, waiting $sleep_time minutes before re-scan"
-sleep $sleep_time
+$sleep_time_secs = $sleep_time * 60
+sleep $sleep_time_secs
 }
