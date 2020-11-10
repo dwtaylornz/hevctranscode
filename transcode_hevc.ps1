@@ -41,7 +41,7 @@ while ($true) {
     Write-Host -NoNewline "Checking all files and sizes (sorting largest to smallest)..." 
     $videos = Get-ChildItem -r $video_directory -Include *.mkv,*.avi,*.mp4,*.ts,*.mov,*.y4m| sort -descending -Property length | select Fullname, name, length
     $file_count = $videos.Count
-    Write-Host "Done" 
+    Write-Host "Done ($file_count)" 
 
     # Get previously skipped files
     Write-Host -NoNewline "Getting previously skipped or completed files..." 
