@@ -23,7 +23,7 @@ $smb_password = "password" # SMB password
 cd $ffmpeg_path
 
 #map media drive 
-while (!(test-path -PathType container $video_directory -AND $smb_enabled -eq "true")) {
+while (!(test-path -PathType container $video_directory) -AND $smb_enabled -eq "true") {
     sleep 2
     Write-Host -NoNewline "Mapping Drive (assuming smb)... "     
     net use z: \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
