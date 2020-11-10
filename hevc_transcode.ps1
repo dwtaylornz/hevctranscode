@@ -1,5 +1,5 @@
 # powershell 
-# github.com/dwtaylornz/hevctranscode
+# github.com/dwtaylornz/hevcamdwin
 #
 # script will continously loop - batch size only used to control how often disk is scanned for new media
 
@@ -12,7 +12,7 @@ cd $ffmpeg_path
 while (!(test-path -PathType container $video_directory) -AND $smb_enabled -eq "true") {
     sleep 2
     Write-Host -NoNewline "Mapping Drive (assuming smb)... "     
-    net use z: \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
+    net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
 }
 
 # Setup temp output folder, and clear previous transcodes
@@ -42,7 +42,7 @@ while ($true) {
         #check media drive still mappped
         while (!(test-path -PathType container $video_directory) -AND $smb_enabled -eq "true") {
             Write-Host "Media drive lost : Attempting to reconnect to media share..."     
-            net use z: \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null
+            net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null
             sleep 10 
         }
 
@@ -208,11 +208,13 @@ while ($true) {
             echo "$video_name" >> skip.log
             $count = $count + 1
 
-            if ($count -ge $file_count) { break }
             if ($run_time_current -ge $scan_period) { break }
           
         }      
               
     }
-
+Write-Host ""
+Write-Host "All files done, waiting 60 seconds before looping"
+sleep 60
+Write-Host ""
 }
