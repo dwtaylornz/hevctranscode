@@ -1,7 +1,8 @@
 # powershell 
 # github.com/dwtaylornz/hevctranscode
 #
-# script will continously loop - $scan_period used to control how often disk is scanned for new media
+# script will continously loop through videos transcoding to HEVC - $scan_period used to control how often disk is scanned for new media
+# populate hevc_transcode_vars.ps1 before running this script. 
 
 # grab variables from var file 
 . .\hevc_transcode_vars.ps1
@@ -122,14 +123,14 @@ while ($true) {
 
             #CPU Offload... (evaluated last) 
             elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { 
-                Write-Host -NoNewline "  Attempting transcode to 1080p HEVC (this may take some time)..."            
+                Write-Host -NoNewline "  Attempting transcode via CPU to 1080p HEVC (this may take some time)..."            
                 ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -vf scale=1920:-1 -map 0 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE     
 
             }
 
             elseif ($video_codec -ne "hevc") { 
-                Write-Host -NoNewline "  Attempting transcode to HEVC (this may take some time)..."            
+                Write-Host -NoNewline "  Attempting transcode via CPU to HEVC (this may take some time)..."            
                 ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -map 0 -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
                 $convert_error = $LASTEXITCODE
                 
@@ -222,7 +223,9 @@ while ($true) {
     }
 Write-Host ""
 $sleep_time = ($scan_period - $run_time_current) 
-Write-Host "All files done, waiting $sleep_time minutes before re-scan"
-$sleep_time_secs = $sleep_time * 60
-sleep $sleep_time_secs
+if ($sleep_time -gt 0) {
+    Write-Host "All files done, waiting $sleep_time minutes before re-scan"
+    $sleep_time_secs = $sleep_time * 60
+    sleep $sleep_time_secs
+    }
 }
