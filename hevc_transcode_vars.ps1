@@ -1,5 +1,5 @@
 # Variables 
-$scan_period = "240" # max minutes before doing a re-scan
+$scan_period = "1440" # max minutes before doing a re-scan
 $move_file = 1 # set to 0 for testing
 $hevc_offload = "AMD" # set to AMD, NVIDIA or CPU
 $ffmpeg_logging = "error" # info, error
