@@ -29,15 +29,17 @@ while ($true) {
     $file_count = $videos.Count
     Write-Host "Done ($file_count)" 
 
-    # Get previously skipped files
+   # Get previously skipped files
     Write-Host -NoNewline "Getting previously skipped or completed files..." 
-    if ((test-path -PathType leaf skip.log)) { $skipped_files = Get-Content -Path skip.log }
-    $skip_count = $skipped_files.Count
+    if ((test-path -PathType leaf skip.log)) { 
+        $skipped_files = Get-Content -Path skip.log 
+        $skip_count = $skipped_files.Count
+        }
+    else {$skip_count = 0}
     $video_count = ($file_count - $skip_count)
     Write-Host "Done ($skip_count)"
     Write-Host ""
     Write-Host "Total videos to process : $video_count. Time before next scan : $scan_period minutes"
-     
     
     $count = 1 
     $run_start = (GET-Date)
