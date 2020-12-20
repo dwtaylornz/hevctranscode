@@ -1,4 +1,5 @@
 # Variables 
+$scan_at_start = 1 # scan files at start of script
 $scan_period = "1440" # max minutes before doing a re-scan
 $move_file = 1 # set to 0 for testing
 $hevc_offload = "AMD" # set to AMD, NVIDIA or CPU
