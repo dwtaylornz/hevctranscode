@@ -15,3 +15,7 @@ $smb_server = "server" # SMB server
 $smb_share = "share" # SMB share
 $smb_user = "user" # SMB username
 $smb_password = "password" # SMB password
+
+# todo 
+# progress update on transcoding 
+# convert to mkv? 
