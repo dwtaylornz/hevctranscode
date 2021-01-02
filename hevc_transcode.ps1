@@ -87,7 +87,7 @@ while ($true) {
         
         
             # run background transcode
-            . .\scripts\hevc_transcode_background.ps1         
+            . .\hevc_transcode_background.ps1         
        
 
             if ($convert_error -eq 0) {          
@@ -152,7 +152,7 @@ while ($true) {
             
             $count = $count + 1
             Write-Host "Batch : $count/$video_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " 
-            Write-Output "Batch : $count/$video_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " >> batch.log
+            # Write-Output "Batch : $count/$video_count, Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " >> batch.log
 
             # Update skip.txt with failed, hevc or already processed file 
             Write-Output "$video_name" >> skip.log
