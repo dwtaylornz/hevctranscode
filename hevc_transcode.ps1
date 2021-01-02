@@ -31,7 +31,7 @@ while ($true) {
 
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
         # Write-Host  Write-Host "Forcing scan" 
-        Start-Job -Name "Scan" -FilePath .\scripts\hevc_transcode_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
+        Start-Job -Name "Scan" -FilePath .\hevc_transcode_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
         Receive-Job -name "Scan" -wait
     }
 
@@ -40,7 +40,7 @@ while ($true) {
         $videos = Import-Csv -Path .\scan_results.csv
         $file_count = $videos.Count
         Write-Host "Done ($file_count)"
-        Start-Job -Name "Scan" -FilePath .\scripts\hevc_transcode_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
+        Start-Job -Name "Scan" -FilePath .\hevc_transcode_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
     }
     
 
