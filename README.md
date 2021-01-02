@@ -2,7 +2,7 @@
 A windows powershell script to re-encode media library videos to HEVC / H265 using ffmpeg on windows with GPU h/w acceleration. 
 
 ### requirements
-- ffmpeg executables for windows (includes hevc_amf) - https://ffmpeg.org/download.html
+- ffmpeg executables for windows (includes gpu offload) - https://ffmpeg.org/download.html
 - a GPU that is supported :) 
 
 ### usage 
@@ -23,6 +23,7 @@ A windows powershell script to re-encode media library videos to HEVC / H265 usi
 - if enabled - will transcode larger resolutions down to 1080p HEVC 
 - writes **transcode.log** for transcode attempts (duration and space savings) 
 - writes **skip.log** for already hevc and failed transcodes (used to skip in next loop, errors in transcode.log) 
+- writes **scan_results.txt** 
 
 ### limitations (potential todo list) 
 Deminishing effort vs reward - 
