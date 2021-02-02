@@ -25,7 +25,7 @@ if (!(test-path -PathType container output)) { new-item -itemtype directory -for
 # Main Loop 
 while ($true) {
     
-    Write-Host ""
+    Write-Host " "
    
     $start_time = (GET-Date)
     Stop-Job * -ea silentlycontinue
@@ -72,19 +72,17 @@ while ($true) {
     while ($true) {
 
         # Job Checker 
-        #Write-Host  "Checking jobs..." 
+        # Write-Host  "- second loop" 
         Start-Sleep 1
 
         # GPU Transcode 
-        if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) )
-            {
+        if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ){
             $gpu_state = (get-job -Name GPU-Transcode).State 
             #Write-Host "  GPU Job exists and" $gpu_state
             Receive-Job -name "GPU-Transcode"
             if ($gpu_state -eq "Completed") {remove-job -name GPU-Transcode}   
             }
-        else
-            {
+        else {
             #Write-Host "  GPU Job doesnt exist" 
             Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $videos, GPU | Out-Null
              
@@ -92,15 +90,13 @@ while ($true) {
 
         if ($disable_parallel_cpu_transcode -eq 0){
             # CPU Transcode 
-            if ( [bool](get-job -Name CPU-Transcode -ea silentlycontinue) )
-                {
+            if ( [bool](get-job -Name CPU-Transcode -ea silentlycontinue) ){
                 $cpu_state = (get-job -Name CPU-Transcode).State 
                # Write-Host "  CPU Job exists and" $cpu_state
                 Receive-Job -name "CPU-Transcode" 
                 if ($cpu_state -eq "Completed") {remove-job -name CPU-Transcode}    
                 }
-            else
-                {
+            else {
                 #Write-Host "  CPU Job doesnt exist" 
                 Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $cpu_videos, CPU | Out-Null
                 }
@@ -113,6 +109,9 @@ while ($true) {
         # Write-Host "Start Time : $start_time Current Time : $current_time Time so far in min : $time_total_min"
 
         if($time_total_min -ge $scan_period){
+            Write-Host ""
+            Write-Host -Nonewline "Scan period Expired - "
+            Remove-Job Scan -ea silentlycontinue
             Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
             Receive-Job -name "Scan" -wait
             $videos = Import-Csv -Path .\scan_results.csv
