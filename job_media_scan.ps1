@@ -1,4 +1,4 @@
-# Get largest files
+﻿# Get largest files
 
 Set-Location $args[0]
 
