@@ -114,6 +114,8 @@ while ($true) {
             Remove-Job Scan -ea silentlycontinue
             Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
             Receive-Job -name "Scan" -wait
+            Write-Host "Done" 
+            Write-Host ""
             $videos = Import-Csv -Path .\scan_results.csv
             $cpu_videos = $videos.Clone()
             [array]::Reverse($cpu_videos)

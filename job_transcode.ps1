@@ -5,9 +5,9 @@ $transcode_type = $args[2]
 
 . .\hevc_transcode_variables.ps1
 
-Foreach ($video in $videos) {
+$run_start = (GET-Date)
 
-    $run_start = (GET-Date)
+Foreach ($video in $videos) {
 
     if ((test-path -PathType leaf skip.log)) { 
         $skipped_files = Get-Content -Path skip.log 
@@ -215,8 +215,10 @@ Foreach ($video in $videos) {
             
             
             $count = $count + 1
-            Write-Host "$transcode_type Batch : Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " 
-            # Write-Output "Batch : Time : $run_time_current/$scan_period, Total GB Saved: $total_saved " >> batch.log
+            $gbpermin = $total_saved / $run_time_current
+            $gbpermin = [math]::Round($gbpermin, 2)
+            Write-Host "$transcode_type Batch : Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin " 
+            Write-Output "Batch : Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin  " >> batch.log
 
             # Update skip.txt with failed, hevc or already processed file 
             Write-Output "$video_name" >> skip.log
