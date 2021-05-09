@@ -168,8 +168,8 @@ Foreach ($video in $videos) {
                 Write-Host ""
 
                 Write-Output "  File - NOT copied" >> transcode.log
-                if ($video_duration_formated -ne $video_new_duration_formated) { Write-Output -NoNewline " (incorrect duration on new video)" >> transcode.log }
-                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Write-Output -NoNewline " (file size change not within limits)" >> transcode.log }
+                if ($video_duration_formated -ne $video_new_duration_formated) { Write-Output "  (incorrect duration on new video)" >> transcode.log }
+                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Write-Output "  (file size change not within limits)" >> transcode.log }
                 if ($move_file -eq 0) { Write-Output -NoNewline" (move file disabled)" >> transcode.log }
                 Write-Output "" >> transcode.log
                     
