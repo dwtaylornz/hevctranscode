@@ -26,6 +26,7 @@ if (!(test-path -PathType container output)) { new-item -itemtype directory -for
 
 Write-Host -NoNewline "Removing any existing running jobs..." 
 Get-job | Remove-Job -Force -ea silentlycontinue
+# Remove-Item processing.log -Force | Out-Null
 Write-Host "Done"
 
 # Main Loop 
@@ -127,7 +128,5 @@ while ($true) {
             $start_time = (GET-Date)
 
         }
-
     }
-
 }

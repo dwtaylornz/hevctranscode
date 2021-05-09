@@ -1,7 +1,7 @@
 ﻿
 Set-Location $args[0]
 $videos = $args[1]
-$loop = $args[2]
+$job = $args[2]
 
 . .\hevc_transcode_variables.ps1
 
@@ -13,10 +13,11 @@ Foreach ($video in $videos) {
 
     if ((test-path -PathType leaf skip.log)) { 
         $skipped_files = Get-Content -Path skip.log 
-        # $skip_count = $skipped_files.Count
     }
-    #else { $skip_count = 0 }
-
+ 
+    if ((test-path -PathType leaf processing.log)) { 
+        $processing_files = Get-Content -Path processing.log 
+    }
 
     #check media drive still mappped
     while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true") {
@@ -64,7 +65,7 @@ Foreach ($video in $videos) {
         $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
 
         Write-Host ""
-        Write-Host "$loop Loop - $video_name"
+        Write-Host "$job Job - $video_name"
         Write-Host "  Size (GB) : $video_size, Codec : $video_codec, Width : $video_width, Length : $video_duration_formated" 
 
         # run background transcode
@@ -76,14 +77,14 @@ Foreach ($video in $videos) {
         #AMD Offload...
         if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { 
             Write-Host "  Attempting transcode via $ffmpeg_codec to 1080p HEVC (started $start_time)"            
-            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE     
 
         }
 
         elseif ($video_codec -ne "hevc") { 
             Write-Host "  Attempting transcode via $ffmpeg_codec to HEVC (started $start_time)"            
-            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i $video_path -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 output\$video_name
+            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE
                 
         }
@@ -125,7 +126,7 @@ Foreach ($video in $videos) {
             if ($diff -ne 0) { Write-Output "  Video size (GB): $video_size -> $video_new_size (HEVC SAVED! $diff)" >> transcode.log }
                 
             Write-Host "" 
-            Write-Host "$loop Loop - $video_name"
+            Write-Host "$job Job - $video_name"
             Write-Host "  Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
                        
             # check the file is healthy
