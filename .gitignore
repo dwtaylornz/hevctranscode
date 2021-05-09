@@ -1,0 +1,11 @@
+hevc_transcode_variables.ps1
+output
+compare
+backup
+ffmpeg.exe
+ffplay.exe
+ffprobe.exe
+*.csv
+*.log
+*.avi
+*.mkv
