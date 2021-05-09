@@ -90,11 +90,11 @@ while ($true) {
         }
         else {
             #Write-Host "  GPU Job doesnt exist" 
-            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $videos, "Big -> Small File" | Out-Null
+            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $videos, "Largest File" | Out-Null
              
         }
 
-        if ($disable_parallel_cpu_transcode -eq 0) {
+        if ($parallel_cpu_transcode -eq 1) {
             #CPU Transcode 
             if ( [bool](get-job -Name CPU-Transcode -ea silentlycontinue) ) {
                 $cpu_state = (get-job -Name CPU-Transcode).State 
@@ -104,7 +104,7 @@ while ($true) {
             }
             else {
                 Write-Host "  CPU Job doesnt exist" 
-                Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $cpu_videos, "Small -> Big File" | Out-Null
+                Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $cpu_videos, "Smallest File" | Out-Null
             }
         }
 
