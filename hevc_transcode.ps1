@@ -1,12 +1,10 @@
 # powershell 
 # github.com/dwtaylornz/hevctranscode
 #
-# script will continously loop through videos transcoding to HEVC - $scan_period used to control how often disk is scanned for new media
+# script will continously loop through videos transcoding to HEVC
 # populate hevc_transcode_vars.ps1 before running this script. 
 
-# todo ;
-# progress update on transcoding 
-# convert to mkv? 
+
 Clear-Host
 $ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
@@ -72,8 +70,6 @@ while ($true) {
     Write-Host "Done ($skip_count)"
     Write-Host ""
     Write-Host "Total videos to process : $video_count. Time before next scan : $scan_period minutes"
-     
-    # $count = 1 
 
     while ($true) {
 
