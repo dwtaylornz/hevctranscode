@@ -4,7 +4,6 @@
 # script will continously loop through videos transcoding to HEVC
 # populate hevc_transcode_vars.ps1 before running this script. 
 
-
 Clear-Host
 $ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
@@ -33,8 +32,6 @@ while ($true) {
     Write-Host " "
    
     $start_time = (GET-Date)
-    #Stop-Job * -ea silentlycontinue
-    #Remove-Job * -ea silentlycontinue
 
     # run Scan job at $media_path or retrive videos from .\scan_results
 
