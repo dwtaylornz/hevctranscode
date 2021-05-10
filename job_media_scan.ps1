@@ -9,6 +9,6 @@ Set-Location $args[0]
 $videos = Get-ChildItem -r $media_path -Include *.mkv, *.avi, *.mp4, *.ts, *.mov, *.y4m, *.m2ts| Sort-Object -descending -Property length | Select-Object Fullname, name, length
 $file_count = $videos.Count
 $videos | Export-Csv ./scan_results.csv
-#Write-Host "Done ($file_count)" 
 
+#Write-Host "Done ($file_count)" 
 #Remove-Job -Name Scan -ea silentlycontinue

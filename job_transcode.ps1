@@ -2,7 +2,7 @@
 Set-Location $args[0]
 $videos = $args[1]
 $job = $args[2]
-$total_saved=0
+$total_saved = 0
 
 . .\hevc_transcode_variables.ps1
 
@@ -16,9 +16,9 @@ Foreach ($video in $videos) {
         $skipped_files = Get-Content -Path skip.log 
     }
  
-    if ((test-path -PathType leaf processing.log)) { 
-        $processing_files = Get-Content -Path processing.log 
-    }
+    #if ((test-path -PathType leaf processing.log)) { 
+    #    $processing_files = Get-Content -Path processing.log 
+    #}
 
     #check media drive still mappped
     while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true") {
