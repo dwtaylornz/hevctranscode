@@ -9,5 +9,5 @@ ffprobe.exe
 *.log
 *.avi
 *.mkv
-.vscode/launch.json
 .gitignore
+.vscode

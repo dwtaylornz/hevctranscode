@@ -2,6 +2,7 @@
 Set-Location $args[0]
 $videos = $args[1]
 $job = $args[2]
+$total_saved=0
 
 . .\hevc_transcode_variables.ps1
 
@@ -111,7 +112,7 @@ Foreach ($video in $videos) {
             $video_new_size = [math]::Round($video_new.length / 1GB, 2)
             $diff = $video_size - $video_new_size
             $diff = [math]::Round($diff, 2)
-            $total_saved = $total_saved + $diff
+           
             $diff_percent = [math]::Round((1 - ($video_new_size / $video_size)) * 100, 2)
 
             #check video length (used for progress updates)
@@ -135,6 +136,7 @@ Foreach ($video in $videos) {
             if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
                 $delay = 5 
+                $total_saved = $total_saved + $diff
                 Write-Host -NoNewline "  Sleep before copy ($delay seconds)..."
                 while ($delay -gt 0) {
                         
@@ -180,7 +182,7 @@ Foreach ($video in $videos) {
         Else {   
                 
             if ($video_codec -eq "hevc") {
-                Write-Host "  HEVC skipped" 
+                Write-Host "  Already HEVC, skipped" 
                 Write-Output "  SKIPPED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" >> transcode.log
             }
             else {
@@ -196,7 +198,7 @@ Foreach ($video in $videos) {
         if ($run_time_current -ne 0) { $gbpermin = $total_saved / $run_time_current }
         else { $gbpermin = 0 }
         $gbpermin = [math]::Round($gbpermin, 2)
-        Write-Host "  Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin " 
+        Write-Host "  Batch Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin " 
         Write-Output "Batch : $run_start Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin  " >> batch.log
 
         # Update skip.txt with failed, hevc or already processed file 
