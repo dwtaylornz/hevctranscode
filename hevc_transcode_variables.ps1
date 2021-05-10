@@ -7,7 +7,7 @@ $media_path = "Z:\videos\" # path in SMB share (must include trailing backslash)
 # Scanning 
 $scan_at_start = 0 # wait for scan files to complete at start of script
 $scan_period = "1440" # max minutes before doing a re-scan
-$scan_disable = 0 # Use this if you have multiple machines running in same directory
+# $scan_disable = 0 # Use this if you have multiple machines running in same directory
 
 # transcode and processing 
 $ffmpeg_codec = "hevc_nvenc" # set to hevc_amf for AMD, hevc_nvenc for Nvidia, libx265 for CPU
