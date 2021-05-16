@@ -7,9 +7,10 @@
 #Clear-Host
 #$ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
-Set-Location $ffmpeg_path
 
 . .\hevc_transcode_variables.ps1
+
+#Set-Location $ffmpeg_path
 
 #map media drive 
 while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true") {
