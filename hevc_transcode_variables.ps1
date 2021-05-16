@@ -19,7 +19,7 @@ $parallel_cpu_transcode = 0 # set to 1 to enable parallel cpu transcoding (EXPER
 # SMB config
 $smb_enabled = "true" # Set to true to map SMB drive
 $smb_driveletter = "z:" # drive letter to map. Include colon. 
-$smb_server = "lexx" # SMB server 
-$smb_share = "videos" # SMB share
-$smb_user = "darren" # SMB username
-$smb_password = "Hithere01" # SMB password
+$smb_server = "server" # SMB server 
+$smb_share = "share" # SMB share
+$smb_user = "user" # SMB username
+$smb_password = "password" # SMB password
