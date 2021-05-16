@@ -4,8 +4,8 @@
 # script will continously loop through videos transcoding to HEVC
 # populate hevc_transcode_vars.ps1 before running this script. 
 
-Clear-Host
-$ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
+#Clear-Host
+#$ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
 Set-Location $ffmpeg_path
 
