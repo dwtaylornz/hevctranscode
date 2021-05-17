@@ -4,9 +4,7 @@
 # script will continously loop through videos transcoding to HEVC
 # populate hevc_transcode_vars.ps1 before running this script. 
 
-#Clear-Host
 #$ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
-
 
 . .\hevc_transcode_variables.ps1
 
@@ -37,7 +35,7 @@ while ($true) {
     # run Scan job at $media_path or retrive videos from .\scan_results
 
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
-        Write-Host  "Creating scan results ..." 
+        Write-Host  "Running file scan..." 
         Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
         Receive-Job -name "Scan" -wait
     }
@@ -84,7 +82,7 @@ while ($true) {
         }
         else {
             #Write-Host "  GPU Job doesnt exist" 
-            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $videos, "Largest File" | Out-Null
+            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $videos, "GPU" | Out-Null
              
         }
 
@@ -97,8 +95,8 @@ while ($true) {
                 if ($cpu_state -eq "Completed") { remove-job -name CPU-Transcode }    
             }
             else {
-                Write-Host "  CPU Job doesnt exist" 
-                Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $cpu_videos, "Smallest File" | Out-Null
+                # Write-Host "  CPU Job doesnt exist" 
+                Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $cpu_videos, "CPU" | Out-Null
             }
         }
 
