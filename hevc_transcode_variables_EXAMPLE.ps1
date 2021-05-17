@@ -1,4 +1,4 @@
-# Variables 
+# Variables EXAMPLE, please rename to hevc_transcode_variables.ps1
 
 # Paths 
 $ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
