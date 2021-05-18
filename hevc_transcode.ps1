@@ -20,10 +20,19 @@ while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true"
 # Setup temp output folder, and clear previous transcodes
 if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }
 
-Write-Host -NoNewline "Removing any existing running jobs..." 
-Get-job | Remove-Job -Force -ea silentlycontinue
-# Remove-Item processing.log -Force | Out-Null
-Write-Host "Done"
+Write-Host "Checking for any existing running jobs..." 
+if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ) {
+    Write-Host "  GPU Job exists and" $gpu_state
+    Receive-Job -name "GPU-Transcode"
+    if ($gpu_state -eq "Completed") { remove-job -name GPU-Transcode }   
+}
+
+if ( [bool](get-job -Name CPU-Transcode -ea silentlycontinue) ) {
+    $cpu_state = (get-job -Name CPU-Transcode).State 
+    Write-Host "  CPU Job exists and" $cpu_state
+    Receive-Job -name "CPU-Transcode" 
+    if ($cpu_state -eq "Completed") { remove-job -name CPU-Transcode }  
+}
 
 # Main Loop 
 while ($true) {
