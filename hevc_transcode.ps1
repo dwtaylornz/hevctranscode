@@ -10,14 +10,11 @@
 
 #Set-Location $ffmpeg_path
 
-#check media drive still mappped
-$test_file = $media_path + "tmp.tmp"
-$test_write = New-Item -ItemType file $test_file -f
-while (!($test_write) -AND $smb_enabled -eq "true") {
-    Write-Host "Media drive lost : Attempting to reconnect to media share..."     
-    net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null
-    Start-Sleep 10
-    $test_write = New-Item -ItemType file $test_file -f
+#map media drive 
+while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true") {
+    Start-Sleep 2
+    Write-Host -NoNewline "Mapping Drive (smb enabled)... "     
+    net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
 }
 
 # Setup temp output folder, and clear previous transcodes
