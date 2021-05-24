@@ -10,11 +10,14 @@
 
 #Set-Location $ffmpeg_path
 
-#map media drive 
-while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true") {
-    Start-Sleep 2
-    Write-Host -NoNewline "Mapping Drive (smb enabled)... "     
-    net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
+#check media drive still mappped
+$test_file = $media_path + "tmp.tmp"
+$test_write = New-Item -ItemType file $test_file -f
+while (!($test_write) -AND $smb_enabled -eq "true") {
+    Write-Host "Media drive lost : Attempting to reconnect to media share..."     
+    net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null
+    Start-Sleep 10
+    $test_write = New-Item -ItemType file $test_file -f
 }
 
 # Setup temp output folder, and clear previous transcodes
@@ -44,7 +47,7 @@ while ($true) {
     # run Scan job at $media_path or retrive videos from .\scan_results
 
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
-        Write-Host  "Running file scan..." 
+        Write-Host  -NoNewline "Running file scan..." 
         Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
         Receive-Job -name "Scan" -wait
     }
