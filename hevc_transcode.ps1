@@ -6,6 +6,8 @@
 
 #$ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
+Import-Module "$PSScriptRoot/functions.psm1" -Force
+
 . .\hevc_transcode_variables.ps1
 
 #Set-Location $ffmpeg_path
