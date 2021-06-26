@@ -6,9 +6,12 @@
 
 #$ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
 
-Import-Module "$PSScriptRoot/functions.psm1" -Force
+$RootDir = Get-Location
 
-. .\hevc_transcode_variables.ps1
+Import-Module ".\functions.psm1" -Force
+
+# . .\hevc_transcode_variables.ps1
+Get-Variables
 
 #Set-Location $ffmpeg_path
 
@@ -47,13 +50,13 @@ while ($true) {
 
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
         Write-Host  -NoNewline "Running file scan..." 
-        Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
+        Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         Receive-Job -name "Scan" -wait
     }
 
     else {
         Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
-        Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
+        Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
     }
     
     $videos = Import-Csv -Path .\scan_results.csv
@@ -93,7 +96,7 @@ while ($true) {
         }
         else {
             #Write-Host "  GPU Job doesnt exist" 
-            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $videos, "GPU" | Out-Null
+            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $RootDir, $videos, "GPU" | Out-Null
              
         }
 
@@ -107,7 +110,7 @@ while ($true) {
             }
             else {
                 # Write-Host "  CPU Job doesnt exist" 
-                Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $ffmpeg_path, $cpu_videos, "CPU" | Out-Null
+                Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $RootDir, $cpu_videos, "CPU" | Out-Null
             }
         }
 
@@ -121,7 +124,7 @@ while ($true) {
             Write-Host ""
             Write-Host -Nonewline "Scan period Expired - "
             Remove-Job Scan -ea silentlycontinue
-            Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $ffmpeg_path | Out-Null
+            Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
             Receive-Job -name "Scan" -wait
             Write-Host "Done" 
             Write-Host ""

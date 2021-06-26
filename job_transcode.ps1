@@ -4,7 +4,10 @@ $videos = $args[1]
 $job = $args[2]
 $total_saved = 0
 
+Import-Module ".\functions.psm1" -Force
+
 . .\hevc_transcode_variables.ps1
+#Get-Variables
 
 $run_start = (GET-Date)
 
@@ -48,7 +51,7 @@ Foreach ($video in $videos) {
 
         #Write-Host "Check if file is HEVC first..."
         $video_codec = $null 
-        $video_codec = (./ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
+        $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
         if (Select-String -pattern "hevc" -InputObject $video_codec -quiet) { $video_codec = "hevc" }
         if (Select-String -pattern "h264" -InputObject $video_codec -quiet) { $video_codec = "h264" } 
         if (Select-String -pattern "vc1" -InputObject $video_codec -quiet) { $video_codec = "vc1" }          
@@ -58,13 +61,13 @@ Foreach ($video in $videos) {
 
         #check video width (1920 width is more consistant for 1080p videos)
         $video_width = $null 
-        $video_width = (./ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
+        $video_width = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
         $video_width = $video_width.trim()
         $video_width = $video_width -as [Int]
 
-        #check video length (used for progress updates)
+        #check video length
         $video_duration = $null 
-        $video_duration = (./ffprobe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
+        $video_duration = (.\ffprobe.exe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
         $video_duration = $video_duration.trim()
         $video_duration_formated = [timespan]::fromseconds($video_duration)
         $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
@@ -82,14 +85,14 @@ Foreach ($video in $videos) {
         #GPU Offload...
         if ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $job -ne "CPU") { 
             Write-Host "  Attempting transcode via $ffmpeg_codec to 1080p HEVC (started $start_time)"            
-            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
+            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE     
 
         }
 
         elseif ($video_codec -ne "hevc" -AND $job -ne "CPU") { 
             Write-Host "  Attempting transcode via $ffmpeg_codec to HEVC (started $start_time)"            
-            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
+            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE
                 
         }
@@ -97,14 +100,14 @@ Foreach ($video in $videos) {
         #CPU...
         elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { 
             Write-Host "  Attempting transcode via libx265 to 1080p HEVC (started $start_time)"            
-            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
+            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE     
                 
         }
 
         elseif ($video_codec -ne "hevc") { 
             Write-Host "  Attempting transcode via libx265 to HEVC (started $start_time)"            
-            ./ffmpeg -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v libx265 -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
+            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v libx265 -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE
                 
         }
@@ -136,7 +139,7 @@ Foreach ($video in $videos) {
 
             #check video length (used for progress updates)
             $video_new_duration = $null 
-            $video_new_duration = (./ffprobe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"output\$video_name"`") | Out-String
+            $video_new_duration = (.\ffprobe.exe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"output\$video_name"`") | Out-String
             $video_new_duration = $video_new_duration.trim()
             $video_new_duration_formated = [timespan]::fromseconds($video_new_duration)
             $video_new_duration_formated = ("{0:hh\:mm\:ss}" -f $video_new_duration_formated)                
