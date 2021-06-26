@@ -6,8 +6,8 @@ $total_saved = 0
 
 Import-Module ".\functions.psm1" -Force
 
-. .\hevc_transcode_variables.ps1
-#Get-Variables
+#. .\hevc_transcode_variables.ps1
+Get-Variables
 
 $run_start = (GET-Date)
 

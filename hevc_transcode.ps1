@@ -25,12 +25,14 @@ while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true"
 # Setup temp output folder, and clear previous transcodes
 if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }
 
+<#
 Write-Host "Checking for any existing running jobs..." 
 if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ) {
     Write-Host "  GPU Job exists and" $gpu_state
     Receive-Job -name "GPU-Transcode"
     if ($gpu_state -eq "Completed") { remove-job -name GPU-Transcode }   
 }
+#>
 
 if ( [bool](get-job -Name CPU-Transcode -ea silentlycontinue) ) {
     $cpu_state = (get-job -Name CPU-Transcode).State 
@@ -56,7 +58,16 @@ while ($true) {
 
     else {
         Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
-        Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
+        
+        if ( [bool](get-job -Name Scan -ea silentlycontinue) ) {
+            if ($gpu_state -eq "Completed") { remove-job -name Scan }   
+        }
+
+        if ( [bool](get-job -Name Scan -ea silentlycontinue) ) {}
+        else {
+            Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
+        }
+        
     }
     
     $videos = Import-Csv -Path .\scan_results.csv
