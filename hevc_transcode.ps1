@@ -6,6 +6,8 @@
 
 $RootDir = Get-Location
 
+Clear-Host
+
 Import-Module ".\functions.psm1" -Force
 
  . .\hevc_transcode_variables.ps1
@@ -28,14 +30,21 @@ if (!(test-path -PathType container output)) { new-item -itemtype directory -for
 if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ) {
     $gpu_state = (get-job -Name GPU-Transcode).State 
     if ($gpu_state -eq "Running") {    
-        Write-Host "GPU Job - exists and" $gpu_state
+        Write-Host "GPU Job - Please wait, job already exists and" $gpu_state -ForegroundColor Yellow
     }
 }
 
 if ( [bool](get-job -Name CPU-Transcode -ea silentlycontinue) ) {
     $cpu_state = (get-job -Name CPU-Transcode).State 
     if ($cpu_state -eq "Running") {  
-        Write-Host "CPU Job - exists and" $cpu_state
+        Write-Host "CPU Job - Please wait, job already exists and" $cpu_state -ForegroundColor Yellow
+    }
+}
+
+if ( [bool](get-job -Name Scan -ea silentlycontinue) ) {
+    $scan_state = (get-job -Name Scan).State 
+    if ($scan_state -eq "Running") {  
+        Write-Host "Scan Job - Please wait, job already exists and" $scan_state -ForegroundColor Yellow
     }
 }
 
@@ -58,11 +67,14 @@ while ($true) {
         Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
         
         if ( [bool](get-job -Name Scan -ea silentlycontinue) ) {
-            if ($gpu_state -eq "Completed") { remove-job -name Scan }   
+            $scan_state = (get-job -Name Scan).State 
+            if ($scan_state -ne "Running") { 
+                remove-job -name Scan 
+                Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
+            }   
         }
+        else{
 
-        if ( [bool](get-job -Name Scan -ea silentlycontinue) ) {}
-        else {
             Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         }
         
