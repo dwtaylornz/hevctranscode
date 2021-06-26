@@ -1,5 +1,4 @@
-﻿
-Set-Location $args[0]
+﻿Set-Location $args[0]
 $videos = $args[1]
 $job = $args[2]
 $total_saved = 0
@@ -61,26 +60,26 @@ Foreach ($video in $videos) {
    
         #GPU Offload...
         if ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $job -ne "CPU") { 
-            Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to 1080p HEVC"      
+            Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to 1080p HEVC..."      
             Start-Sleep 5      
-            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
+            .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
         }
 
         elseif ($video_codec -ne "hevc" -AND $job -ne "CPU") { 
-            Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to HEVC"            
+            Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC..."            
             Start-Sleep 5
-            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"       
+            .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"       
         }
         
         #CPU...
         elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { 
-            Trace-Message "$job Job - $video_name Attempting transcode via libx265 to 1080p HEVC"            
-            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"        
+            Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via libx265 to 1080p HEVC..."            
+            .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"        
         }
 
         elseif ($video_codec -ne "hevc") { 
-            Trace-Message "$job Job - $video_name Attempting transcode via libx265 to HEVC"            
-            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v libx265 -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"     
+            Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via libx265 to HEVC..."            
+            .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v libx265 -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"     
         }
         
             
@@ -152,18 +151,18 @@ Foreach ($video in $videos) {
 
             else {
                 
-                if ($video_duration_formated -ne $video_new_duration_formated) { Trace-Message "$job Job - $video_name incorrect duration on new video $video_new_duration_formated" }
-                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Trace-Message "$job Job - $video_name file size change not within limits" }
-                if ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled" }
-                Trace-Message "$job Job - $video_name  File - NOT copied"     
+                if ($video_duration_formated -ne $video_new_duration_formated) { Trace-Message "$job Job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" }
+                elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Trace-Message "$job Job - $video_name file size change not within limits, File - NOT copied" }
+                elseif ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled, File - NOT copied" }
+                else {Trace-Message "$job Job - $video_name File - NOT copied"     }
             }         
                 
         }
 
         Else {   
                 
-            if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name Skip HEVC, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" }
-            else { Trace-Message "$job Job - $video_name ERROR or FAILED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" }        
+            if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
+            else { Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }        
                                           
         }     
             
@@ -173,8 +172,6 @@ Foreach ($video in $videos) {
         if ($run_time_current -ne 0) { $gbpermin = $total_saved / $run_time_current }
         else { $gbpermin = 0 }
         $gbpermin = [math]::Round($gbpermin, 2)
-        #Write-Host "  Batch Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin " 
-        #Write-Output "Batch : $run_start Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin  " >> batch.log
 
         # Update skip.txt with failed, hevc or already processed file 
         Write-Output "$video_name" >> skip.log
