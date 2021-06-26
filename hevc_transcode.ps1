@@ -4,14 +4,12 @@
 # script will continously loop through videos transcoding to HEVC
 # populate hevc_transcode_vars.ps1 before running this script. 
 
-#$ffmpeg_path = "C:\temp\ffmpeg\bin" # where ffmpeg lives
-
 $RootDir = Get-Location
 
 Import-Module ".\functions.psm1" -Force
 
-# . .\hevc_transcode_variables.ps1
-Get-Variables
+ . .\hevc_transcode_variables.ps1
+# Get-Variables
 
 #Set-Location $ffmpeg_path
 
@@ -96,7 +94,7 @@ while ($true) {
 
         # Job Checker 
         # Write-Host  "- second loop" 
-        Start-Sleep 1
+        # Start-Sleep 1
 
         # GPU Transcode 
         if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ) {

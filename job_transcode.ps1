@@ -6,8 +6,8 @@ $total_saved = 0
 
 Import-Module ".\functions.psm1" -Force
 
-#. .\hevc_transcode_variables.ps1
-Get-Variables
+. .\hevc_transcode_variables.ps1
+# Get-Variables
 
 $run_start = (GET-Date)
 
@@ -24,6 +24,7 @@ Foreach ($video in $videos) {
     #}
 
     #check media drive still mappped
+    <#
     $test_file = $media_path + "tmp.tmp"
     $test_write = New-Item -ItemType file $test_file -f
     while (!($test_write) -AND $smb_enabled -eq "true") {
@@ -32,7 +33,7 @@ Foreach ($video in $videos) {
         Start-Sleep 10
         $test_write = New-Item -ItemType file $test_file -f
     }
-
+#>
 
     $video_path = $video.Fullname
     $video_name = $video.name
