@@ -192,11 +192,11 @@ Foreach ($video in $videos) {
         Else {   
                 
             if ($video_codec -eq "hevc") {
-                Write-Host "  Already HEVC, skipped" 
+                # Write-Host "  Already HEVC, skipped" 
                 Trace-Message  "$job Job - $video_name SKIPPED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" 
             }
             else {
-                Write-Host "  ERROR or FAILED" 
+                # Write-Host "  ERROR or FAILED" 
                 Trace-Message "$job Job - $video_name ERROR or FAILED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" 
             }        
                                           

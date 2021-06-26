@@ -100,7 +100,8 @@ while ($true) {
     $video_count = ($file_count - $skip_count)
     Write-Host "Done ($skip_count)"
     Write-Host ""
-    Write-Host "Total videos to process : $video_count. Time before next scan : $scan_period minutes"
+    Trace-Message "Total videos to process : $video_count. Time before next scan : $scan_period minutes"
+    Write-Host ""
 
     while ($true) {
 
