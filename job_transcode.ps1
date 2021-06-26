@@ -73,9 +73,9 @@ Foreach ($video in $videos) {
         $video_duration_formated = [timespan]::fromseconds($video_duration)
         $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
 
-        Write-Host ""
-        Write-Host "$job Job - $video_name"
-        Write-Host "  Size (GB) : $video_size, Codec : $video_codec, Width : $video_width, Length : $video_duration_formated" 
+        # Write-Host ""
+        Write-Host -nonewline "$job Job - $video_name"
+        # Write-Host "  Size (GB) : $video_size, Codec : $video_codec, Width : $video_width, Length : $video_duration_formated" 
 
         # run background transcode
         #. .\job_hevc_transcode.ps1    
@@ -85,7 +85,8 @@ Foreach ($video in $videos) {
    
         #GPU Offload...
         if ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $job -ne "CPU") { 
-            Write-Host "  Attempting transcode via $ffmpeg_codec to 1080p HEVC (started $start_time)"            
+            Write-Host "  Attempting transcode via $ffmpeg_codec to 1080p HEVC (started $start_time)"      
+            Start-Sleep 5      
             .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE     
 
@@ -93,6 +94,7 @@ Foreach ($video in $videos) {
 
         elseif ($video_codec -ne "hevc" -AND $job -ne "CPU") { 
             Write-Host "  Attempting transcode via $ffmpeg_codec to HEVC (started $start_time)"            
+            Start-Sleep 5
             .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE
                 
@@ -151,7 +153,9 @@ Foreach ($video in $videos) {
                 
             Write-Host "" 
             Write-Host "$job Job - $video_name"
-            Write-Host "  Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
+            if ($video_new_size -ne 0){
+                Write-Host "  Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
+                }
                        
             # check the file is healthy
             #confirm move file is enabled, and confirm file is 5% smaller or non-zero 
@@ -169,12 +173,12 @@ Foreach ($video in $videos) {
 
                 }                                   
                     
-                Write-Host  "0"                    
+                Write-Host  -NoNewLine "0"                    
                 Write-Host -NoNewline "  Overwriting original file " 
                 write-host -NoNewline "(do not break or close window)" -ForegroundColor Yellow
                 Write-host -NoNewline "..." 
                 Move-item -Path "output\$video_name" -destination "$video_path" -Force
-                Write-Host  "Done"
+                Write-Host  " Done"
 
             }   
 
@@ -183,11 +187,11 @@ Foreach ($video in $videos) {
                 Write-Host -NoNewline "  File - NOT copied"
                 if ($video_duration_formated -ne $video_new_duration_formated) { 
                     Write-Host -NoNewline " (incorrect duration on new video)" 
-                    Remove-Item output\$video_name | Out-Null
+                   # Remove-Item output\$video_name | Out-Null
                 }
                 if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
                     Write-Host -NoNewline " (file size change not within limits)" 
-                    Remove-Item output\$video_name | Out-Null
+                   # Remove-Item output\$video_name | Out-Null
                 }
                 if ($move_file -eq 0) { Write-Host -NoNewline " (move file disabled)" }
                 Write-Host ""
@@ -205,7 +209,7 @@ Foreach ($video in $videos) {
                 
             if ($video_codec -eq "hevc") {
                 Write-Host "  Already HEVC, skipped" 
-                Write-Output "  SKIPPED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" >> transcode.log
+                # Write-Output "  SKIPPED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" >> transcode.log
             }
             else {
                 Write-Host "  ERROR or FAILED" 
@@ -220,8 +224,8 @@ Foreach ($video in $videos) {
         if ($run_time_current -ne 0) { $gbpermin = $total_saved / $run_time_current }
         else { $gbpermin = 0 }
         $gbpermin = [math]::Round($gbpermin, 2)
-        Write-Host "  Batch Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin " 
-        Write-Output "Batch : $run_start Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin  " >> batch.log
+        #Write-Host "  Batch Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin " 
+        #Write-Output "Batch : $run_start Time : $run_time_current/$scan_period, Total GB Saved: $total_saved, GB/min : $gbpermin  " >> batch.log
 
         # Update skip.txt with failed, hevc or already processed file 
         Write-Output "$video_name" >> skip.log

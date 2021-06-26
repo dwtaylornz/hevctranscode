@@ -23,20 +23,20 @@ while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true"
 # Setup temp output folder, and clear previous transcodes
 if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }
 
-<#
-Write-Host "Checking for any existing running jobs..." 
+
+# Write-Host "Checking for any existing running jobs..." 
 if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ) {
-    Write-Host "  GPU Job exists and" $gpu_state
-    Receive-Job -name "GPU-Transcode"
-    if ($gpu_state -eq "Completed") { remove-job -name GPU-Transcode }   
+    $gpu_state = (get-job -Name GPU-Transcode).State 
+    if ($gpu_state -eq "Running") {    
+        Write-Host "GPU Job - exists and" $gpu_state
+    }
 }
-#>
 
 if ( [bool](get-job -Name CPU-Transcode -ea silentlycontinue) ) {
     $cpu_state = (get-job -Name CPU-Transcode).State 
-    Write-Host "  CPU Job exists and" $cpu_state
-    Receive-Job -name "CPU-Transcode" 
-    if ($cpu_state -eq "Completed") { remove-job -name CPU-Transcode }  
+    if ($cpu_state -eq "Running") {  
+        Write-Host "CPU Job - exists and" $cpu_state
+    }
 }
 
 # Main Loop 
@@ -101,7 +101,7 @@ while ($true) {
             $gpu_state = (get-job -Name GPU-Transcode).State 
             #Write-Host "  GPU Job exists and" $gpu_state
             Receive-Job -name "GPU-Transcode"
-            if ($gpu_state -eq "Completed") { remove-job -name GPU-Transcode }   
+            if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { remove-job -name GPU-Transcode -Force}   
         }
         else {
             #Write-Host "  GPU Job doesnt exist" 
@@ -115,7 +115,7 @@ while ($true) {
                 $cpu_state = (get-job -Name CPU-Transcode).State 
                 # Write-Host "  CPU Job exists and" $cpu_state
                 Receive-Job -name "CPU-Transcode" 
-                if ($cpu_state -eq "Completed") { remove-job -name CPU-Transcode }    
+                if ($cpu_state -eq "Completed"-OR $cpu_state -eq "Stopped") { remove-job -name CPU-Transcode -Force}    
             }
             else {
                 # Write-Host "  CPU Job doesnt exist" 
