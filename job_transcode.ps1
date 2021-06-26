@@ -138,7 +138,7 @@ Foreach ($video in $videos) {
             # Write-Host "" 
             # Write-Host "$job Job - $video_name"
             if ($video_new_size -ne 0){
-                Trace-Message "$job Job - $video_name  Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
+                Trace-Message "$job Job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
                 }
                        
             # check the file is healthy
@@ -170,20 +170,20 @@ Foreach ($video in $videos) {
                     
                 Write-Host -NoNewline "  File - NOT copied"
                 if ($video_duration_formated -ne $video_new_duration_formated) { 
-                    Write-Host -NoNewline " (incorrect duration on new video)" 
+                    Write-Host -NoNewline "$job Job - $video_name (incorrect duration on new video)" 
                    # Remove-Item output\$video_name | Out-Null
                 }
                 if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-                    Write-Host -NoNewline " (file size change not within limits)" 
+                    Write-Host -NoNewline "$job Job - $video_name (file size change not within limits)" 
                    # Remove-Item output\$video_name | Out-Null
                 }
                 if ($move_file -eq 0) { Write-Host -NoNewline " (move file disabled)" }
                 Write-Host ""
 
-                Write-Output "  File - NOT copied" >> transcode.log
-                if ($video_duration_formated -ne $video_new_duration_formated) { Write-Output "  (incorrect duration on new video $video_new_duration_formated)" >> transcode.log }
-                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Write-Output "  (file size change not within limits)" >> transcode.log }
-                if ($move_file -eq 0) { Write-Output -NoNewline" (move file disabled)" >> transcode.log }
+                Trace-Message "$job Job - $video_name  File - NOT copied" 
+                if ($video_duration_formated -ne $video_new_duration_formated) { Trace-Message "$job Job - incorrect duration on new video $video_new_duration_formated"  }
+                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Trace-Message "$job Job - file size change not within limits"  }
+                if ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled"  }
                     
             }         
                 
