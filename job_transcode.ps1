@@ -69,7 +69,7 @@ Foreach ($video in $videos) {
    
         #GPU Offload...
         if ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $job -ne "CPU") { 
-            Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to 1080p HEVC (started $start_time)"      
+            Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to 1080p HEVC"      
             Start-Sleep 5      
             .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE     
@@ -77,7 +77,7 @@ Foreach ($video in $videos) {
         }
 
         elseif ($video_codec -ne "hevc" -AND $job -ne "CPU") { 
-            Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to HEVC (started $start_time)"            
+            Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to HEVC"            
             Start-Sleep 5
             .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE
@@ -86,14 +86,14 @@ Foreach ($video in $videos) {
         
         #CPU...
         elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { 
-            Trace-Message "$job Job - $video_name Attempting transcode via libx265 to 1080p HEVC (started $start_time)"            
+            Trace-Message "$job Job - $video_name Attempting transcode via libx265 to 1080p HEVC"            
             .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE     
                 
         }
 
         elseif ($video_codec -ne "hevc") { 
-            Trace-Message "$job Job - $video_name Attempting transcode via libx265 to HEVC (started $start_time)"            
+            Trace-Message "$job Job - $video_name Attempting transcode via libx265 to HEVC"            
             .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v libx265 -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
             #$convert_error = $LASTEXITCODE
                 
