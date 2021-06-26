@@ -56,47 +56,31 @@ Foreach ($video in $videos) {
         $video_duration = $video_duration.trim()
         $video_duration_formated = [timespan]::fromseconds($video_duration)
         $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
-
-        # Write-Host ""
-        # Write-Host -nonewline "$job Job - $video_name"
-        # Write-Host "  Size (GB) : $video_size, Codec : $video_codec, Width : $video_width, Length : $video_duration_formated" 
-
-        # run background transcode
-        #. .\job_hevc_transcode.ps1    
-            
+          
         $start_time = (GET-Date)
-        # $convert_error = 1 
    
         #GPU Offload...
         if ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $job -ne "CPU") { 
             Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to 1080p HEVC"      
             Start-Sleep 5      
             .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
-            #$convert_error = $LASTEXITCODE     
-
         }
 
         elseif ($video_codec -ne "hevc" -AND $job -ne "CPU") { 
             Trace-Message "$job Job - $video_name Attempting transcode via $ffmpeg_codec to HEVC"            
             Start-Sleep 5
-            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
-            #$convert_error = $LASTEXITCODE
-                
+            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"       
         }
         
         #CPU...
         elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { 
             Trace-Message "$job Job - $video_name Attempting transcode via libx265 to 1080p HEVC"            
-            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
-            #$convert_error = $LASTEXITCODE     
-                
+            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"        
         }
 
         elseif ($video_codec -ne "hevc") { 
             Trace-Message "$job Job - $video_name Attempting transcode via libx265 to HEVC"            
-            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v libx265 -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
-            #$convert_error = $LASTEXITCODE
-                
+            .\ffmpeg.exe -hide_banner -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v libx265 -x265-params log-level=error -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"     
         }
         
             
@@ -111,7 +95,7 @@ Foreach ($video in $videos) {
         $run_time = $end_time - $run_start
         $run_time_current = $run_time.minutes + ($run_time.hours * 60)
 
-        Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
+        # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
        
        
         if (test-path -PathType leaf output\$video_name) {        
@@ -133,13 +117,13 @@ Foreach ($video in $videos) {
 
             Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formated)" 
             if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
-            if ($diff -ne 0 -OR $video_new_size -ne 0) { Trace-Message "  Video size (GB): $video_size -> $video_new_size (HEVC SAVED! $diff)" }
+            # if ($diff -ne 0 -OR $video_new_size -eq 0) { Trace-Message "  Video size (GB): $video_size -> $video_new_size (HEVC SAVED! $diff)" }
                 
             # Write-Host "" 
             # Write-Host "$job Job - $video_name"
-            if ($video_new_size -ne 0){
+            if ($video_new_size -ne 0) {
                 Trace-Message "$job Job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
-                }
+            }
                        
             # check the file is healthy
             #confirm move file is enabled, and confirm file is 5% smaller or non-zero 
@@ -167,38 +151,19 @@ Foreach ($video in $videos) {
             }   
 
             else {
-                    
-                Write-Host -NoNewline "  File - NOT copied"
-                if ($video_duration_formated -ne $video_new_duration_formated) { 
-                    Write-Host -NoNewline "$job Job - $video_name (incorrect duration on new video)" 
-                   # Remove-Item output\$video_name | Out-Null
-                }
-                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-                    Write-Host -NoNewline "$job Job - $video_name (file size change not within limits)" 
-                   # Remove-Item output\$video_name | Out-Null
-                }
-                if ($move_file -eq 0) { Write-Host -NoNewline " (move file disabled)" }
-                Write-Host ""
-
-                Trace-Message "$job Job - $video_name  File - NOT copied" 
-                if ($video_duration_formated -ne $video_new_duration_formated) { Trace-Message "$job Job - incorrect duration on new video $video_new_duration_formated"  }
-                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Trace-Message "$job Job - file size change not within limits"  }
-                if ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled"  }
-                    
+                
+                if ($video_duration_formated -ne $video_new_duration_formated) { Trace-Message "$job Job - $video_name incorrect duration on new video $video_new_duration_formated" }
+                if ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Trace-Message "$job Job - $video_name file size change not within limits" }
+                if ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled" }
+                Trace-Message "$job Job - $video_name  File - NOT copied"     
             }         
                 
         }
 
         Else {   
                 
-            if ($video_codec -eq "hevc") {
-                # Write-Host "  Already HEVC, skipped" 
-                Trace-Message  "$job Job - $video_name SKIPPED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" 
-            }
-            else {
-                # Write-Host "  ERROR or FAILED" 
-                Trace-Message "$job Job - $video_name ERROR or FAILED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" 
-            }        
+            if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name Skip HEVC, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" }
+            else { Trace-Message "$job Job - $video_name ERROR or FAILED, (Codec: $video_codec, Width : $video_width, Size (GB): $video_size)" }        
                                           
         }     
             

@@ -10,10 +10,8 @@ Clear-Host
 
 Import-Module ".\functions.psm1" -Force
 
- . .\hevc_transcode_variables.ps1
+. .\hevc_transcode_variables.ps1
 # Get-Variables
-
-#Set-Location $ffmpeg_path
 
 #map media drive 
 while (!(test-path -PathType container $media_path) -AND $smb_enabled -eq "true") {
@@ -73,7 +71,7 @@ while ($true) {
                 Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
             }   
         }
-        else{
+        else {
 
             Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         }
@@ -114,7 +112,7 @@ while ($true) {
             $gpu_state = (get-job -Name GPU-Transcode).State 
             #Write-Host "  GPU Job exists and" $gpu_state
             Receive-Job -name "GPU-Transcode"
-            if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { remove-job -name GPU-Transcode -Force}   
+            if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { remove-job -name GPU-Transcode -Force }   
         }
         else {
             #Write-Host "  GPU Job doesnt exist" 
@@ -128,7 +126,7 @@ while ($true) {
                 $cpu_state = (get-job -Name CPU-Transcode).State 
                 # Write-Host "  CPU Job exists and" $cpu_state
                 Receive-Job -name "CPU-Transcode" 
-                if ($cpu_state -eq "Completed"-OR $cpu_state -eq "Stopped") { remove-job -name CPU-Transcode -Force}    
+                if ($cpu_state -eq "Completed" -OR $cpu_state -eq "Stopped") { remove-job -name CPU-Transcode -Force }    
             }
             else {
                 # Write-Host "  CPU Job doesnt exist" 
