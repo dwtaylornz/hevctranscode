@@ -114,7 +114,7 @@ Foreach ($video in $videos) {
             $video_new_duration_formated = [timespan]::fromseconds($video_new_duration)
             $video_new_duration_formated = ("{0:hh\:mm\:ss}" -f $video_new_duration_formated)                
 
-            Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formated)" 
+            # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formated)" 
             if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
             # if ($diff -ne 0 -OR $video_new_size -eq 0) { Trace-Message "  Video size (GB): $video_size -> $video_new_size (HEVC SAVED! $diff)" }
                 
