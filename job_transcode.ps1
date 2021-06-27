@@ -131,7 +131,7 @@ Foreach ($video in $videos) {
 
                 $delay = 5 
                 $total_saved = $total_saved + $diff
-                Write-Host -NoNewline "  Sleep before copy ($delay seconds)..."
+                Write-Host -NoNewline "  Sleep before file move ($delay seconds)..."
                 while ($delay -gt 0) {
                         
                     Write-Host -NoNewline "$delay..."
