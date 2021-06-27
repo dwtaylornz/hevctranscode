@@ -6,17 +6,17 @@ A windows powershell script to re-encode media library videos to HEVC / H265 usi
 - a GPU that is supported :) 
 
 ### usage 
-- Place ffmpeg tools in same folder as script 
-- Update variables and rename variables example file to hevc_transcode_variables.ps1 
+- Download and place ffmpeg tools in same folder as script 
+- Rename variables example file to hevc_transcode_variables.ps1 and update variables!
 - Run hevc_transcode.ps1 in powershell 
 
 ### warning! 
-**It will overwrite existing source files if conversion is successfull**
+**Script will overwrite existing source files if conversion is successfull**
 
 ### functions
 - traverses root path (scans all video files in subfolders) - as a job in background 
 - transcodes video stream to hevc using **AMD or Nvidia GPU** (largest to smallest file) 
-- transcodes video stream to hevc using CPU (smallest to largest file - in parallel) 
+- transcodes video stream to hevc using CPU (smallest to largest file - in parallel) -  EXPERIMENTAL
 - copys all existing audio and subtitles (i.e. no conversion) 
 - able to set min time before re-scanning media folder 
 - overwrites source with new HEVC transcode if **move_file = 1** (WARNING this is default!) 
