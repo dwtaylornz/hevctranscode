@@ -2,7 +2,7 @@
 
 Set-Location $args[0]
 
-write-host "i'm in the job media scan"
+# write-host "i'm in the job media scan"
 
 # grab variables from var file 
 . .\hevc_transcode_variables.ps1

@@ -151,12 +151,20 @@ Foreach ($video in $videos) {
 
             else {
                 
-                if ($video_duration_formated -ne $video_new_duration_formated) { Trace-Message "$job Job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" }
-                elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { Trace-Message "$job Job - $video_name file size change not within limits, File - NOT copied" }
+                if ($video_duration_formated -ne $video_new_duration_formated) { 
+                    Trace-Message "$job Job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" 
+                    Remove-Item output\$video_name
+                }
+                elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
+                    Trace-Message "$job Job - $video_name file size change not within limits, File - NOT copied" 
+                    Remove-Item output\$video_name
+                }
                 elseif ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled, File - NOT copied" }
-                else {Trace-Message "$job Job - $video_name File - NOT copied"     }
+                else { Trace-Message "$job Job - $video_name File - NOT copied" }
+               
             }         
                 
+           
         }
 
         Else {   

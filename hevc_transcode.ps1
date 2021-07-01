@@ -105,7 +105,7 @@ while ($true) {
 
         # Job Checker 
         # Write-Host  "- second loop" 
-        # Start-Sleep 1
+        
 
         # GPU Transcode 
         if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ) {
@@ -153,6 +153,8 @@ while ($true) {
             [array]::Reverse($cpu_videos)
             $start_time = (GET-Date)
 
+
         }
+        Start-Sleep 1
     }
 }
