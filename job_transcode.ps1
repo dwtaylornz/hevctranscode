@@ -55,19 +55,24 @@ Foreach ($video in $videos) {
         $video_duration = $video_duration.trim()
         $video_duration_formated = [timespan]::fromseconds($video_duration)
         $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
+
+        if ($video_size -lt $min_video_size){
+            Trace-Message "Video smaller than minium of $min_video_size, exiting..."
+            Start-Sleep 10   
+            exit}
           
         $start_time = (GET-Date)
    
         #GPU Offload...
         if ($convert_1080p -eq 1 -AND $video_width -gt 1920 -AND $job -ne "CPU") { 
             Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to 1080p HEVC..."      
-            Start-Sleep 5      
+            Start-Sleep 1      
             .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
         }
 
         elseif ($video_codec -ne "hevc" -AND $job -ne "CPU") { 
             Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC..."            
-            Start-Sleep 5
+            Start-Sleep 1
             .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"       
         }
         

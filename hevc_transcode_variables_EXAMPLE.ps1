@@ -15,6 +15,7 @@ $move_file = 1 # set to 0 for testing (check .\output directory in ffmpeg_path)
 $ffmpeg_logging = "error" # info, error
 $convert_1080p = 1 # 1 will convert higher resolution videos down to 1080p , 0 will not
 $parallel_cpu_transcode = 0 # set to 1 to enable parallel cpu transcoding (EXPERIMENTAL) 
+$min_video_size = 1 # min size in GB of video before it will quit
 
 # SMB config
 $smb_enabled = "true" # Set to true to map SMB drive
