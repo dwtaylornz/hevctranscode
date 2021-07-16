@@ -106,10 +106,6 @@ while ($true) {
         # Job Checker 
         # Write-Host  "- second loop" 
         
-
-        # GPU Transcode 
-        if ( [bool](get-job -Name GPU-Transcode -ea silentlycontinue) ) {
-            $gpu_state = (get-job -Name GPU-Transcode).State 
             #Write-Host "  GPU Job exists and" $gpu_state
             Receive-Job -name "GPU-Transcode"
             if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { remove-job -name GPU-Transcode -Force }   
@@ -159,4 +155,3 @@ while ($true) {
         }
         Start-Sleep 1
     }
-}
