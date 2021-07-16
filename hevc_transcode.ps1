@@ -132,6 +132,8 @@ while ($true) {
                 # Write-Host "  CPU Job doesnt exist" 
                 Start-Job -Name "CPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $RootDir, $cpu_videos, "CPU" | Out-Null
             }
+
+            Start-Sleep 1
         }
 
         $current_time = (GET-Date)
