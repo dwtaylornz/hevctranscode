@@ -106,14 +106,13 @@ while ($true) {
         # Job Checker 
         # Write-Host  "- second loop" 
         
-            #Write-Host "  GPU Job exists and" $gpu_state
-            Receive-Job -name "GPU-Transcode"
-            if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { remove-job -name GPU-Transcode -Force }   
-        }
+        #Write-Host "  GPU Job exists and" $gpu_state
+        Receive-Job -name "GPU-Transcode"
+        if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { remove-job -name GPU-Transcode -Force }   
+        
         else {
             #Write-Host "  GPU Job doesnt exist" 
-            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $RootDir, $videos, "GPU" | Out-Null
-             
+            Start-Job -Name "GPU-Transcode" -FilePath .\job_transcode.ps1 -ArgumentList $RootDir, $videos, "GPU" | Out-Null 
         }
 
         if ($parallel_cpu_transcode -eq 1) {
@@ -155,3 +154,4 @@ while ($true) {
         }
         Start-Sleep 1
     }
+}

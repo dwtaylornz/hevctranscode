@@ -17,7 +17,8 @@ function Get-VideoCodec ([string] $video_path) {
 function Get-VideoWidth ([string] $video_path) {
     #check video width (1920 width is more consistant for 1080p videos)
     $video_width = $null 
-    $video_width = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
+ 
+   $video_width = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
     $video_width = $video_width.trim()
     $video_width = $video_width -as [Int]
     return $video_width
@@ -32,6 +33,13 @@ function Get-VideoDuration ([string] $video_path) {
     $video_duration_formated = [timespan]::fromseconds($video_duration)
     $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
     return $video_duration
+}
+
+function Get-VideoDurationFormatted ([string] $video_duration) {
+
+    $video_duration_formated = [timespan]::fromseconds($video_duration)
+    $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
+    return $video_duration_formated
 }
 
 Export-ModuleMember -Function *
