@@ -40,7 +40,11 @@ Foreach ($video in $videos) {
         $video_width = Get-VideoWidth $video_path
 
         #check video duration 
-        $video_duration = Get-VideoDuration $video_path
+        $video_duration = $null 
+        $video_duration = (.\ffprobe.exe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
+        $video_duration = $video_duration.trim()
+        $video_duration_formated = [timespan]::fromseconds($video_duration)
+        $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
 
         if ($video_size -lt $min_video_size){
             Trace-Message "Video smaller than minium of $min_video_size, exiting..."
