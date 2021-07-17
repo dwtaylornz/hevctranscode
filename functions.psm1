@@ -2,6 +2,7 @@ function Trace-Message ([string] $message) {
     Write-Output "$(Get-Date -Format G): $message"
     Write-Output "$(Get-Date -Format G): $message" >> hevc_transcode.log
 }
+
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
@@ -13,6 +14,7 @@ function Get-VideoCodec ([string] $video_path) {
     if (Select-String -pattern "rawvideo" -InputObject $video_codec -quiet) { $video_codec = "rawvideo" }
     return $video_codec
 }
+
 function Get-VideoWidth ([string] $video_path) {
     #check video width (1920 width is more consistant for 1080p videos)
     $video_width = $null 
@@ -22,7 +24,6 @@ function Get-VideoWidth ([string] $video_path) {
     $video_width = $video_width -as [Int]
     return $video_width
 }
-
 
 function Get-VideoDuration ([string] $video_path) {
     #check video length
