@@ -68,13 +68,12 @@ $video_count = ($file_count - $skip_count)
 Write-Host "Done ($skip_count)"
 Write-Host ""
 Trace-Message "Total videos to process : $video_count"
-Write-Host ""
 
 if ((test-path -PathType leaf skip.log)) { 
     $skipped_files = Get-Content -Path skip.log 
 }
 
-get-job -name GPU-Transcode-*
+get-job -State Running
 Write-Host " "
 
 Foreach ($video in $videos) {
