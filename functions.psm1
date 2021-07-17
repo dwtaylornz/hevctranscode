@@ -2,7 +2,6 @@ function Trace-Message ([string] $message) {
     Write-Output "$(Get-Date -Format G): $message"
     Write-Output "$(Get-Date -Format G): $message" >> hevc_transcode.log
 }
-
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
@@ -40,6 +39,15 @@ function Get-VideoDurationFormatted ([string] $video_duration) {
     $video_duration_formated = [timespan]::fromseconds($video_duration)
     $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
     return $video_duration_formated
+}
+
+function Get-JobStatus ([string] $job) {
+# Write-Host "Checking for any existing running jobs..." 
+if ( [bool](get-job -Name $job -ea silentlycontinue) ) {
+    $state = (get-job -Name $job).State 
+    # if ($state -eq "Running") { Write-Host "$job Job - Please wait, job already exists and Running"  -ForegroundColor Yellow }
+    return $state
+    }
 }
 
 Export-ModuleMember -Function *
