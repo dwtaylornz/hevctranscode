@@ -28,8 +28,6 @@ if (!(test-path -PathType container output)) { new-item -itemtype directory -for
     
 Write-Host " "
    
-$start_time = (GET-Date)
-
 # run Scan job at $media_path or retrive videos from .\scan_results
 
 if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
@@ -81,7 +79,7 @@ Write-Host " "
 
 Foreach ($video in $videos) {
 
-    $run_start = (GET-Date)
+
     $video_name = $video.name
     
     #check if file is in skip list 
@@ -94,10 +92,6 @@ Foreach ($video in $videos) {
     }
 
     if ($skip -eq 0) {   
-
-        $video_path = $video.Fullname
-        $video_size = [math]::Round($video.length / 1GB, 2)
-        #    Write-Output "Next in queue: $video_name" 
 
         while ($true) {
 
