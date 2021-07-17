@@ -43,7 +43,6 @@ elseif ($video_codec -ne "hevc") {
     .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"       
 }
 
-    
 $end_time = (GET-Date)
 
 #calc time taken 
@@ -56,7 +55,6 @@ $run_time = $end_time - $run_start
 $run_time_current = $run_time.minutes + ($run_time.hours * 60)
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
-
 
 if (test-path -PathType leaf output\$video_name) {        
 
@@ -130,13 +128,11 @@ Else {
         
     if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
     else { Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }        
-                                    
+                              
 }     
-    
     
 $count = $count + 1
 
 if ($run_time_current -ne 0) { $gbpermin = $total_saved / $run_time_current }
 else { $gbpermin = 0 }
 $gbpermin = [math]::Round($gbpermin, 2)
-
