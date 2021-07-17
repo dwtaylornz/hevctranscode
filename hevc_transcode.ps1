@@ -48,10 +48,7 @@ else {
             Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         }   
     }
-    else {
-
-        Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
-    }
+    else { Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null }
         
 }
     
@@ -78,6 +75,9 @@ Write-Host ""
 if ((test-path -PathType leaf skip.log)) { 
     $skipped_files = Get-Content -Path skip.log 
 }
+
+get-job -name GPU-Transcode-*
+Write-Host " "
 
 Foreach ($video in $videos) {
 
@@ -127,9 +127,9 @@ Foreach ($video in $videos) {
                     break
                 }            
             }          
-            # Start-Sleep 1
+
            if($done -eq 1) {break}
         }
-        #  Start-Sleep 1
+
     }
 }

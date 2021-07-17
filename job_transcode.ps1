@@ -27,6 +27,9 @@ $video_duration_formated = Get-VideoDurationFormatted $video_duration
 
 $start_time = (GET-Date)
 
+# Update skip.txt with failed, hevc or already processed file 
+Write-Output "$video_name" >> skip.log
+
 #GPU Offload...
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) { 
     Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to 1080p HEVC..."      
@@ -137,5 +140,3 @@ if ($run_time_current -ne 0) { $gbpermin = $total_saved / $run_time_current }
 else { $gbpermin = 0 }
 $gbpermin = [math]::Round($gbpermin, 2)
 
-# Update skip.txt with failed, hevc or already processed file 
-Write-Output "$video_name" >> skip.log
