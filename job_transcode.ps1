@@ -32,13 +32,13 @@ $start_time = (GET-Date)
 
 #GPU Offload...
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) { 
-    Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to 1080p HEVC..."      
+    Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to 1080p HEVC"      
     Start-Sleep 1      
     .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
 }
 
 elseif ($video_codec -ne "hevc") { 
-    Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC..."            
+    Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC"            
     Start-Sleep 1
     .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"       
 }
