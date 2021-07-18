@@ -10,9 +10,12 @@ Import-Module ".\functions.psm1" -Force
 $run_start = (GET-Date)
 
 #write-host "start-transcode" 
+$video_name = $video.name
+
+# Update skip.txt with failed, hevc or already processed file 
+Write-Output "$video_name" >> skip.log
 
 $video_path = $video.Fullname
-$video_name = $video.name
 $video_size = [math]::Round($video.length / 1GB, 2)
 
 #Write-Host "Check if file is HEVC first..."
@@ -26,9 +29,6 @@ $video_duration = Get-VideoDuration $video_path
 $video_duration_formated = Get-VideoDurationFormatted $video_duration 
 
 $start_time = (GET-Date)
-
-# Update skip.txt with failed, hevc or already processed file 
-Write-Output "$video_name" >> skip.log
 
 #GPU Offload...
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) { 
@@ -86,24 +86,13 @@ if (test-path -PathType leaf output\$video_name) {
     #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
     if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
-        $delay = 5 
-        $total_saved = $total_saved + $diff
-        Write-Host -NoNewline "  Sleep before file move ($delay seconds)..."
-        while ($delay -gt 0) {
-                
-            Write-Host -NoNewline "$delay..."
-            Start-Sleep 1
-            $delay = $delay - 1 
+        Write-Host -NoNewline "  Sleep 5 seconds before file move "
+        write-host "(do not break or close window)" -ForegroundColor Yellow
+        
+        Start-Sleep 5
 
-        }                                   
-            
-        Write-Host  -NoNewLine "0"                    
-        Write-Host -NoNewline "  Overwriting original file " 
-        write-host -NoNewline "(do not break or close window)" -ForegroundColor Yellow
-        Write-host -NoNewline "..." 
-        Move-item -Path "output\$video_name" -destination "$video_path" -Force
-        Write-Host  " Done"
-
+        try { Move-item -Path "output\$video_name" -destination "$video_path" -Force }
+        catch { Trace-Message "Error moving $video_name back to source location - Check permissions" }
     }   
 
     else {
@@ -118,21 +107,10 @@ if (test-path -PathType leaf output\$video_name) {
         }
         elseif ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled, File - NOT copied" }
         else { Trace-Message "$job Job - $video_name File - NOT copied" }
-        
-    }         
-        
-    
+    }            
 }
 
 Else {   
-        
     if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
-    else { Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }        
-                              
+    else { Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
 }     
-    
-$count = $count + 1
-
-if ($run_time_current -ne 0) { $gbpermin = $total_saved / $run_time_current }
-else { $gbpermin = 0 }
-$gbpermin = [math]::Round($gbpermin, 2)

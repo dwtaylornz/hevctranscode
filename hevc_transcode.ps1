@@ -78,50 +78,38 @@ Write-Host " "
 
 Foreach ($video in $videos) {
 
-
     $video_name = $video.name
     
-    #check if file is in skip list 
-    $skip = 0 
-    Foreach ($skipped_file in $skipped_files) {
-        if ($skipped_file -eq $video_name) {
-            $skip = 1
-            break
-        }  
-    }
-
-    if ($skip -eq 0) {   
+    if ($video_name -notin $skipped_files) {
 
         while ($true) {
 
-                $done=0
+            $done = 0
 
             for ($thread = 1; $thread -le $GPU_threads; $thread++) {
-                # Write-Host $thread 
+                # get thread state 
                 $gpu_state = Get-JobStatus "GPU-Transcode-$thread"
 
+                # clear completed or stopped jobs 
                 if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { 
                     Receive-Job -name "GPU-Transcode-$thread" 
                     remove-job -name "GPU-Transcode-$thread" -Force 
                 }   
-            
-        #               if ($gpu_state -eq "Running") {
-         #                Write-Output "i can NOT start $video_name in thread $thread"                
-         #        } 
 
+                # Output existing jobs 
                 if ($gpu_state -eq "Running" ) { 
                     Receive-Job -name "GPU-Transcode-$thread" 
                 }   
 
+                # If thread not running then i can run it here 
                 if ($gpu_state -ne "Running") {
-                   # Write-Output "i can start $video_name in thread $thread"
                     Start-Job -Name "GPU-Transcode-$thread" -FilePath .\job_transcode.ps1 -ArgumentList $RootDir, $video, "GPU($thread)" | Out-Null 
                     $done = 1 
                     break
                 }            
             }          
 
-           if($done -eq 1) {break}
+            if ($done -eq 1) { break }
         }
 
     }
