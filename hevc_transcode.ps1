@@ -46,7 +46,7 @@ else {
             Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         }   
     }
-    else { Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null }
+    # else { Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null }
         
 }
     
@@ -69,17 +69,26 @@ Write-Host "Done ($skip_count)"
 Write-Host ""
 Trace-Message "Total videos to process : $video_count"
 
-if ((test-path -PathType leaf skip.log)) { 
-    $skipped_files = Get-Content -Path skip.log 
-}
+if ((test-path -PathType leaf skip.log)) { $skipped_files = Get-Content -Path skip.log }
+else {$skipped_files = ""}
 
 get-job -State Running
 Write-Host " "
 
 Foreach ($video in $videos) {
 
-    $video_name = $video.name
     
+    $video_size = [math]::Round($video.length / 1GB, 2)
+    
+    if($video_size -lt $min_video_size){
+        Trace-Message "ALL DONE - Video smaller than defined $min_video_size, removing skip file and quiting"
+        Remove-Item skip.log
+        pause
+        Break
+    }
+
+    $video_name = $video.name
+
     if ($video_name -notin $skipped_files) {
 
         while ($true) {
