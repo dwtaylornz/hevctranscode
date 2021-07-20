@@ -81,8 +81,7 @@ Foreach ($video in $videos) {
     $video_size = [math]::Round($video.length / 1GB, 2)
     
     if($video_size -lt $min_video_size){
-        Trace-Message "ALL DONE - Video smaller than defined $min_video_size, removing skip file and quiting"
-        Remove-Item skip.log
+        Trace-Message "ALL DONE - Video smaller than defined $min_video_size, quiting"
         pause
         Break
     }
