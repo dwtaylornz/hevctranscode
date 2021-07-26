@@ -12,6 +12,7 @@ function Get-VideoCodec ([string] $video_path) {
     if (Select-String -pattern "mpeg2video" -InputObject $video_codec -quiet) { $video_codec = "mpeg2video" }
     if (Select-String -pattern "mpeg4" -InputObject $video_codec -quiet) { $video_codec = "mpeg4" }
     if (Select-String -pattern "rawvideo" -InputObject $video_codec -quiet) { $video_codec = "rawvideo" }
+    if (Select-String -pattern "vp9" -InputObject $video_codec -quiet) { $video_codec = "vp9" }
     return $video_codec
 }
 
