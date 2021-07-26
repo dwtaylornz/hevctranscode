@@ -8,7 +8,7 @@ $RootDir = Get-Location
 
 Clear-Host
 
-Import-Module ".\functions.psm1" -Force
+Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
 . .\hevc_transcode_variables.ps1
@@ -32,7 +32,7 @@ Write-Host " "
 
 if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
     Write-Host  -NoNewline "Running file scan..." 
-    Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
+    Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
     Receive-Job -name "Scan" -wait
 }
 
@@ -43,7 +43,7 @@ else {
         $scan_state = (get-job -Name Scan).State 
         if ($scan_state -ne "Running") { 
             remove-job -name Scan 
-            Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
+            Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         }   
     }
     # else { Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null }
@@ -111,10 +111,11 @@ Foreach ($video in $videos) {
 
                 # If thread not running then i can run it here 
                 if ($gpu_state -ne "Running") {
-                    Start-Job -Name "GPU-Transcode-$thread" -FilePath .\job_transcode.ps1 -ArgumentList $RootDir, $video, "GPU($thread)" | Out-Null 
+                    Start-Job -Name "GPU-Transcode-$thread" -FilePath .\include\job_transcode.ps1 -ArgumentList $RootDir, $video, "GPU($thread)" | Out-Null 
                     $done = 1 
                     break
-                }            
+                }       
+                   
             }          
 
             if ($done -eq 1) { break }

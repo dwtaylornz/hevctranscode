@@ -1,6 +1,8 @@
 function Trace-Message ([string] $message) {
     Write-Output "$(Get-Date -Format G): $message"
-    Write-Output "$(Get-Date -Format G): $message" >> hevc_transcode.log
+    $delay = Get-Random -Minimum 0 -Maximum 100
+    Start-Sleep -Milliseconds $delay
+    Write-Output "$(Get-Date -Format G): $message" >> .\hevc_transcode.log
 }
 
 function Get-VideoCodec ([string] $video_path) {
