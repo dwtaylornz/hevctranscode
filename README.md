@@ -23,10 +23,7 @@ A windows powershell script to re-encode media library videos to HEVC / H265 usi
 - checks to see if video codec is already HEVC (if so, skips)
 - checks that HEVC conversion is successful (using video length) and is smaller than origanal file (99.9% of time this is true) - if larger does not overwrite and skips file 
 - convert_1080p - if enabled will transcode larger resolutions down to 1080p HEVC 
-- writes **transcode.log** for transcode attempts (duration and space savings) 
-- writes **skip.log** for already hevc and failed transcodes (used to skip in next loop, errors in transcode.log) 
-- writes **batch.log** for batch details 
-- writes **scan_results.txt** 
+- writes **hevc_transcode.log** for logging :) 
 
 ### limitations (potential todo list) 
 Deminishing effort vs reward - 
