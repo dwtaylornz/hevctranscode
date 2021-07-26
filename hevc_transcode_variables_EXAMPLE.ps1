@@ -5,7 +5,7 @@ $media_path = "Z:\videos\" # path in SMB share (must include trailing backslash)
 
 # Scanning & healthcheck
 $scan_at_start = 0 # wait for scan files to complete at start of script
-$run_health_check = 1 # also run quick health check of videos 
+$run_health_check = 0 # also run quick health check of videos 
 
 # transcode and processing 
 $ffmpeg_codec = "hevc_nvenc" # set to hevc_amf for AMD, hevc_nvenc for Nvidia, libx265 for CPU

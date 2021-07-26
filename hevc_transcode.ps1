@@ -54,6 +54,11 @@ $videos = Import-Csv -Path .\scan_results.csv
 $file_count = $videos.Count
 Write-Host "Done ($file_count)" 
 
+if ($run_health_check -eq 1) { 
+    Write-Host "Running health scan..." 
+    Start-Job -Name "HealthCheck" -FilePath .\include\job_health_check.ps1 -ArgumentList $RootDir, $videos | Out-Null
+}
+
 # Get previously skipped files from skip.log 
 
 Write-Host -NoNewline "Getting previously skipped or completed files..." 
