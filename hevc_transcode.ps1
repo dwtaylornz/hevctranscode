@@ -92,6 +92,7 @@ Foreach ($video in $videos) {
             Start-Sleep 1
             # get-job -State Running
         }   
+        Trace-Message "exiting"
         Break
     }
 

@@ -12,8 +12,7 @@ $run_start = (GET-Date)
 #write-host "start-transcode" 
 $video_name = $video.name
 
-# Update skip.txt with failed, hevc or already processed file 
-Write-Output "$video_name" >> skip.log
+
 
 $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 2)
@@ -114,3 +113,6 @@ Else {
     if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
     else { Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
 }     
+
+# Update skip.txt with processed file 
+Write-Output "$video_name" >> skip.log
