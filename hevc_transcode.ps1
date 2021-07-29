@@ -38,22 +38,23 @@ if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) 
 
 else {
     Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
+    $videos = Import-Csv -Path .\scan_results.csv   
+    $file_count = $videos.Count
+    Write-Host "Done ($file_count)" 
         
-    if ( [bool](get-job -Name Scan -ea silentlycontinue) ) {
+    if ((get-job -Name Scan -ea silentlycontinue) ) {
         $scan_state = (get-job -Name Scan).State 
         if ($scan_state -ne "Running") { 
-            remove-job -name Scan 
-            Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
-        }   
+            Remove-job Scan
+            Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
+        }
     }
-    # else { Start-Job -Name "Scan" -FilePath .\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null }
-        
+
+    else {
+        Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
+    }
 }
     
-$videos = Import-Csv -Path .\scan_results.csv   
-$file_count = $videos.Count
-Write-Host "Done ($file_count)" 
-
 if ($run_health_check -eq 1) { 
     Write-Host "Running health scan..." 
     Start-Job -Name "HealthCheck" -FilePath .\include\job_health_check.ps1 -ArgumentList $RootDir, $videos | Out-Null
@@ -75,19 +76,22 @@ Write-Host ""
 Trace-Message "Total videos to process : $video_count"
 
 if ((test-path -PathType leaf skip.log)) { $skipped_files = Get-Content -Path skip.log }
-else {$skipped_files = ""}
+else { $skipped_files = "" }
 
 get-job -State Running
 Write-Host " "
 
 Foreach ($video in $videos) {
-
     
     $video_size = [math]::Round($video.length / 1GB, 2)
     
-    if($video_size -lt $min_video_size){
-        Trace-Message "ALL DONE - Video smaller than defined $min_video_size, quiting"
-        pause
+    if ($video_size -lt $min_video_size) {
+        Trace-Message "ALL DONE - Video smaller than defined $min_video_size, waiting for jobs to finish then quiting"
+
+        while (get-job -State Running -ea silentlycontinue) {
+            Start-Sleep 1
+            # get-job -State Running
+        }   
         Break
     }
 
