@@ -2,7 +2,7 @@
 $video = $args[1]
 $job = $args[2]
 
-Import-Module ".\functions.psm1" -Force
+Import-Module ".\include\functions.psm1" -Force
 
 . .\hevc_transcode_variables.ps1
 # Get-Variables
@@ -12,8 +12,7 @@ $run_start = (GET-Date)
 #write-host "start-transcode" 
 $video_name = $video.name
 
-# Update skip.txt with failed, hevc or already processed file 
-Write-Output "$video_name" >> skip.log
+
 
 $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 2)
@@ -52,6 +51,7 @@ $time_mins = $time.minutes
 $time_secs = $time.seconds
 $total_time_formated = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
 $run_time = $end_time - $run_start
+$run_time_current = $run_time.minutes + ($run_time.hours * 60)
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
 
@@ -113,3 +113,6 @@ Else {
     if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
     else { Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
 }     
+
+# Update skip.txt with processed file 
+Write-Output "$video_name" >> skip.log
