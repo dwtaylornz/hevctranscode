@@ -7,8 +7,6 @@ Import-Module ".\functions.psm1" -Force
 . .\hevc_transcode_variables.ps1
 # Get-Variables
 
-$run_start = (GET-Date)
-
 #write-host "start-transcode" 
 $video_name = $video.name
 
@@ -51,7 +49,6 @@ $time_hours = $time.hours
 $time_mins = $time.minutes
 $time_secs = $time.seconds
 $total_time_formated = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
-$run_time = $end_time - $run_start
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
 
