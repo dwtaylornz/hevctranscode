@@ -90,7 +90,7 @@ Foreach ($video in $videos) {
 
         while (get-job -State Running -ea silentlycontinue) {
             Start-Sleep 1
-            # get-job -State Running
+            Receive-Job *
         }   
         Trace-Message "exiting"
         Break
