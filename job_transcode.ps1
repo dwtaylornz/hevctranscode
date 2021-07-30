@@ -52,7 +52,6 @@ $time_mins = $time.minutes
 $time_secs = $time.seconds
 $total_time_formated = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
 $run_time = $end_time - $run_start
-$run_time_current = $run_time.minutes + ($run_time.hours * 60)
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
 
