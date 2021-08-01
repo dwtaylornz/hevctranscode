@@ -1,8 +1,10 @@
 function Trace-Message ([string] $message) {
     Write-Output "$(Get-Date -Format G): $message"
-    $delay = Get-Random -Minimum 0 -Maximum 200
-    Start-Sleep -Milliseconds $delay
-    Write-Output "$(Get-Date -Format G): $message" >> .\hevc_transcode.log
+    $mtx = New-Object System.Threading.Mutex($false, "LogMutex")
+    If ($mtx.WaitOne(1000)) {
+        Write-Output "$(Get-Date -Format G): $message" >> .\hevc_transcode.log
+        [void]$mtx.ReleaseMutex()
+    }
 }
 
 function Get-VideoCodec ([string] $video_path) {
