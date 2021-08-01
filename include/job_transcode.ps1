@@ -11,9 +11,6 @@ $run_start = (GET-Date)
 
 #write-host "start-transcode" 
 $video_name = $video.name
-
-
-
 $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 2)
 
@@ -23,11 +20,16 @@ $video_codec = Get-VideoCodec $video_path
 #check video width (1920 width is more consistant for 1080p videos)
 $video_width = Get-VideoWidth $video_path
 
-#check video duration $
+#check video duration 
 $video_duration = Get-VideoDuration $video_path
 $video_duration_formated = Get-VideoDurationFormatted $video_duration 
 
 $start_time = (GET-Date)
+
+# NVIDIA TUNING - disable NVDEC 
+if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-b:v 0"}
+
+$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 
 #GPU Offload...
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) { 
@@ -39,7 +41,7 @@ if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) {
 elseif ($video_codec -ne "hevc") { 
     Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC"            
     Start-Sleep 1
-    .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"       
+    Invoke-Expression $ffmpeg_params
 }
 
 $end_time = (GET-Date)
@@ -51,7 +53,6 @@ $time_mins = $time.minutes
 $time_secs = $time.seconds
 $total_time_formated = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
 $run_time = $end_time - $run_start
-$run_time_current = $run_time.minutes + ($run_time.hours * 60)
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
 
