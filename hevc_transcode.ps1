@@ -6,8 +6,6 @@
 
 $RootDir = Get-Location
 
-Clear-Host
-
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
@@ -20,7 +18,6 @@ if ($smb_enabled) {
         Write-Host -NoNewline "Mapping Drive (smb enabled)... "     
         net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
     }  
-
 }
 
 # Setup temp output folder, and clear previous transcodes

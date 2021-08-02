@@ -25,7 +25,7 @@ $video_duration_formated = Get-VideoDurationFormatted $video_duration
 $start_time = (GET-Date)
 
 # NVIDIA TUNING - disable NVDEC 
-if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-b:v 0"}
+#if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-b:v 0"}
 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 
@@ -88,7 +88,10 @@ if (test-path -PathType leaf output\$video_name) {
         
         Start-Sleep 5
 
-        try { Move-item -Path "output\$video_name" -destination "$video_path" -Force }
+        try {
+            Move-item -Path "output\$video_name" -destination "$video_path" -Force 
+            Trace-Savings "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
+        }
         catch { Trace-Message "Error moving $video_name back to source location - Check permissions" }
     }   
 
@@ -104,7 +107,7 @@ if (test-path -PathType leaf output\$video_name) {
             Start-Sleep 1
             Remove-Item output\$video_name
         }
-        elseif ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled, File - NOT copied" }
+        elseif ($move_file -eq 0) { Trace-Message "$job - $video_name move file disabled, File - NOT copied" }
         else { Trace-Message "$job - $video_name File - NOT copied" }
     }            
 }
