@@ -25,7 +25,7 @@ $video_duration_formated = Get-VideoDurationFormatted $video_duration
 $start_time = (GET-Date)
 
 # NVIDIA TUNING - disable NVDEC 
-#if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-b:v 0"}
+#if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 
@@ -39,7 +39,7 @@ if ($video_codec -ne "hevc") {
     Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC"            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
-    If ($err -ne ""){ Trace-Error "$job - $video_name $err"}
+    If ($err -ne "") { Trace-Error "$job - $video_name $err" }
 }
 
 $end_time = (GET-Date)
@@ -102,13 +102,13 @@ if (test-path -PathType leaf output\$video_name) {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
             Trace-Message "$job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" 
-           Start-Sleep 5
-           Remove-Item output\$video_name
+            Start-Sleep 2
+            Remove-Item output\$video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
             Trace-Message "$job - $video_name file size change not within limits, File - NOT copied" 
-           Start-Sleep 5
-           Remove-Item output\$video_name
+            Start-Sleep 2
+            Remove-Item output\$video_name
         }
         elseif ($move_file -eq 0) { Trace-Message "$job - $video_name move file disabled, File - NOT copied" }
         else { Trace-Message "$job - $video_name File - NOT copied" }
@@ -116,8 +116,9 @@ if (test-path -PathType leaf output\$video_name) {
 }
 
 Else {   
-    if ($video_codec -eq "hevc") { Trace-Message  "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" 
-    Write-Output "$video_name" >> skip.log
+    if ($video_codec -eq "hevc") {
+        Trace-Message  "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" 
+        Write-Output "$video_name" >> skip.log
     }
     else { Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
 }     
