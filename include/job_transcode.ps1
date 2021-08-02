@@ -29,17 +29,17 @@ $start_time = (GET-Date)
 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 
-#GPU Offload...
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) { 
-    Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to 1080p HEVC"      
-    Start-Sleep 1      
-    .\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i "$video_path" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 "output\$video_name"
+    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 }
 
-elseif ($video_codec -ne "hevc") { 
+#GPU Offload...
+if ($video_codec -ne "hevc") { 
+    Write-Output "$video_name" >> skip.log
     Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC"            
     Start-Sleep 1
-    Invoke-Expression $ffmpeg_params
+    Invoke-Expression $ffmpeg_params -ErrorVariable err 
+    If ($err){ Trace-Error $err}
 }
 
 $end_time = (GET-Date)
@@ -84,28 +84,31 @@ if (test-path -PathType leaf output\$video_name) {
     if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
         Write-Host -NoNewline "  Sleep 5 seconds before file move "
-        write-host "(do not break or close window)" -ForegroundColor Yellow
-        
+        write-host "(do not break or close window)" -ForegroundColor Yellow     
         Start-Sleep 5
 
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
             Trace-Savings "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
         }
-        catch { Trace-Message "Error moving $video_name back to source location - Check permissions" }
+        catch {
+            Trace-Message "Error moving $video_name back to source location - Check permissions"
+            Trace-Error $_.exception.message 
+    
+        }
     }   
 
     else {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
             Trace-Message "$job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" 
-            Start-Sleep 1
-            Remove-Item output\$video_name
+           # Start-Sleep 5
+           # Remove-Item output\$video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
             Trace-Message "$job - $video_name file size change not within limits, File - NOT copied" 
-            Start-Sleep 1
-            Remove-Item output\$video_name
+           # Start-Sleep 5
+           # Remove-Item output\$video_name
         }
         elseif ($move_file -eq 0) { Trace-Message "$job - $video_name move file disabled, File - NOT copied" }
         else { Trace-Message "$job - $video_name File - NOT copied" }
@@ -113,9 +116,8 @@ if (test-path -PathType leaf output\$video_name) {
 }
 
 Else {   
-    if ($video_codec -eq "hevc") { Trace-Message  "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
+    if ($video_codec -eq "hevc") { Trace-Message  "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" 
+    Write-Output "$video_name" >> skip.log
+    }
     else { Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
 }     
-
-# Update skip.txt with processed file 
-Write-Output "$video_name" >> skip.log

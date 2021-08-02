@@ -5,7 +5,6 @@ Import-Module ".\include\functions.psm1" -Force
 
 Foreach ($video in $videos) {
     $video_duration = 0
-    $video_name = $video.name
     $video_path = $video.Fullname
     # Write-Output $video_name
     $video_duration = Get-VideoDuration $video_path

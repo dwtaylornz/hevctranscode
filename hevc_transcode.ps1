@@ -5,7 +5,6 @@
 # populate hevc_transcode_variables.ps1 before running this script. 
 
 $RootDir = Get-Location
-
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
