@@ -16,6 +16,16 @@ function Trace-Savings ([string] $message) {
     }
 }
 
+
+function Trace-Savings ([string] $message) {
+    Write-Output "$(Get-Date -Format G): $message"
+    $mtx2 = New-Object System.Threading.Mutex($false, "SavingsMutex")
+    If ($mtx2.WaitOne(1000)) {
+        Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_savings.log
+        [void]$mtx2.ReleaseMutex()
+    }
+}
+
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
