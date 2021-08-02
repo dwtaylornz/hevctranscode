@@ -39,7 +39,7 @@ if ($video_codec -ne "hevc") {
     Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC"            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
-    If ($err){ Trace-Error $video_name $err}
+    If ($err -ne ""){ Trace-Error "$job - $video_name $err"}
 }
 
 $end_time = (GET-Date)
@@ -102,13 +102,13 @@ if (test-path -PathType leaf output\$video_name) {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
             Trace-Message "$job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" 
-           # Start-Sleep 5
-           # Remove-Item output\$video_name
+           Start-Sleep 5
+           Remove-Item output\$video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
             Trace-Message "$job - $video_name file size change not within limits, File - NOT copied" 
-           # Start-Sleep 5
-           # Remove-Item output\$video_name
+           Start-Sleep 5
+           Remove-Item output\$video_name
         }
         elseif ($move_file -eq 0) { Trace-Message "$job - $video_name move file disabled, File - NOT copied" }
         else { Trace-Message "$job - $video_name File - NOT copied" }
