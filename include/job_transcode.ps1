@@ -104,7 +104,7 @@ if (test-path -PathType leaf output\$video_name) {
             Start-Sleep 1
             Remove-Item output\$video_name
         }
-        elseif ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled, File - NOT copied" }
+        elseif ($move_file -eq 0) { Trace-Message "$job - $video_name move file disabled, File - NOT copied" }
         else { Trace-Message "$job - $video_name File - NOT copied" }
     }            
 }
