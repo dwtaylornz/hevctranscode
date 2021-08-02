@@ -13,7 +13,7 @@ $move_file = 1 # set to 0 for testing (check .\output directory)
 $ffmpeg_logging = "error" # info, error
 $convert_1080p = 1 # 1 will convert higher resolution videos down to 1080p , 0 will not
 $min_video_size = 0 # min size in GB of video before it will quit
-$GPU_threads = 2 # how many GPU jobs at same time 
+$GPU_threads = 3 # how many GPU jobs at same time 
 
 # SMB config - if you want to map drive 
 $smb_enabled = "false" # Set to true to map SMB drive

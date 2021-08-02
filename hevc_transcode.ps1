@@ -22,7 +22,8 @@ if ($smb_enabled) {
 
 # Setup temp output folder, and clear previous transcodes
 if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }
-    
+if (!(test-path -PathType container logs)) { new-item -itemtype directory -force -path logs | Out-Null }    
+
 Write-Host " "
    
 # run Scan job at $media_path or retrive videos from .\scan_results
