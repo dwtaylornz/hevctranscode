@@ -1,9 +1,18 @@
 function Trace-Message ([string] $message) {
     Write-Output "$(Get-Date -Format G): $message"
-    $mtx = New-Object System.Threading.Mutex($false, "LogMutex")
+    $mtx = New-Object System.Threading.Mutex($false, "TranscodeMutex")
     If ($mtx.WaitOne(1000)) {
         Write-Output "$(Get-Date -Format G): $message" >> .\hevc_transcode.log
         [void]$mtx.ReleaseMutex()
+    }
+}
+
+function Trace-Savings ([string] $message) {
+    Write-Output "$(Get-Date -Format G): $message"
+    $mtx2 = New-Object System.Threading.Mutex($false, "SavingsMutex")
+    If ($mtx2.WaitOne(1000)) {
+        Write-Output "$(Get-Date -Format G): $message" >> .\hevc_savings.log
+        [void]$mtx2.ReleaseMutex()
     }
 }
 
