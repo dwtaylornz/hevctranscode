@@ -75,7 +75,7 @@ if (test-path -PathType leaf output\$video_name) {
 
     # Write-Host "$job Job - $video_name"
     if ($video_new_size -ne 0) {
-        Trace-Message "$job Job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
+        Trace-Message "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
     }
                 
     # check the file is healthy
@@ -95,21 +95,23 @@ if (test-path -PathType leaf output\$video_name) {
     else {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
-            Trace-Message "$job Job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" 
+            Trace-Message "$job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" 
+            Start-Sleep 1
             Remove-Item output\$video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-            Trace-Message "$job Job - $video_name file size change not within limits, File - NOT copied" 
+            Trace-Message "$job - $video_name file size change not within limits, File - NOT copied" 
+            Start-Sleep 1
             Remove-Item output\$video_name
         }
         elseif ($move_file -eq 0) { Trace-Message "$job Job - $video_name move file disabled, File - NOT copied" }
-        else { Trace-Message "$job Job - $video_name File - NOT copied" }
+        else { Trace-Message "$job - $video_name File - NOT copied" }
     }            
 }
 
 Else {   
-    if ($video_codec -eq "hevc") { Trace-Message  "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
-    else { Trace-Message "$job Job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
+    if ($video_codec -eq "hevc") { Trace-Message  "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" }
+    else { Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
 }     
 
 # Update skip.txt with processed file 
