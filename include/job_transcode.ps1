@@ -39,7 +39,7 @@ if ($video_codec -ne "hevc") {
     Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC"            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
-    If ($err){ Trace-Error $err}
+    If ($err){ Trace-Error $video_name $err}
 }
 
 $end_time = (GET-Date)
