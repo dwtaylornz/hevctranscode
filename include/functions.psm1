@@ -8,7 +8,6 @@ function Trace-Message ([string] $message) {
 }
 
 function Trace-Savings ([string] $message) {
-    Write-Output "$(Get-Date -Format G): $message"
     $mtx2 = New-Object System.Threading.Mutex($false, "SavingsMutex")
     If ($mtx2.WaitOne(1000)) {
         Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_savings.log
@@ -17,7 +16,6 @@ function Trace-Savings ([string] $message) {
 }
 
 function Trace-Error ([string] $message) {
-    Write-Output "$(Get-Date -Format G): $message"
     $mtx3 = New-Object System.Threading.Mutex($false, "ErrorMutex")
     If ($mtx3.WaitOne(1000)) {
         Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_error.log
@@ -26,7 +24,7 @@ function Trace-Error ([string] $message) {
 }
 
 function Write-Skip ([string] $video_name) {
-    $mtx4 = New-Object System.Threading.Mutex($false, "ErrorMutex")
+    $mtx4 = New-Object System.Threading.Mutex($false, "SkipMutex")
     If ($mtx4.WaitOne(1000)) {
         Write-Output "$video_name" >> .\skip.log
         [void]$mtx4.ReleaseMutex()
