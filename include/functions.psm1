@@ -25,6 +25,14 @@ function Trace-Error ([string] $message) {
     }
 }
 
+function Write-Skip ([string] $video_name) {
+    $mtx4 = New-Object System.Threading.Mutex($false, "ErrorMutex")
+    If ($mtx4.WaitOne(1000)) {
+        Write-Output "$video_name" >> .\skip.log
+        [void]$mtx4.ReleaseMutex()
+    }
+}
+
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
