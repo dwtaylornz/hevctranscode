@@ -35,7 +35,6 @@ if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) {
 
 #GPU Offload...
 if ($video_codec -ne "hevc") { 
-    Write-Skip $video_name
     Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Attempting transcode via $ffmpeg_codec to HEVC"            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
@@ -118,7 +117,8 @@ if (test-path -PathType leaf output\$video_name) {
 Else {   
     if ($video_codec -eq "hevc") {
         Trace-Message  "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) Skipped HEVC" 
-        Write-Skip $video_name
+        
     }
     else { Trace-Message "$job - $video_name (Codec: $video_codec, Width : $video_width, Size (GB): $video_size) ERROR or FAILED" }                                
 }     
+Write-Skip $video_name
