@@ -31,7 +31,13 @@ if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) 
     Write-Host  -NoNewline "Running file scan..." 
     Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
     Receive-Job -name "Scan" -wait
+    $videos = Import-Csv -Path .\scan_results.csv   
+    $file_count = $videos.Count
+    Write-Host "Done ($file_count)" 
+  
 }
+
+
 
 else {
     Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
