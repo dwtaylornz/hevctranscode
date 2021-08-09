@@ -37,8 +37,6 @@ if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) 
   
 }
 
-
-
 else {
     Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
     $videos = Import-Csv -Path .\scan_results.csv   

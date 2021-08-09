@@ -83,7 +83,7 @@ if (test-path -PathType leaf output\$video_name) {
     if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
         Write-Host -NoNewline "  Sleep 5 seconds before file move "
-        write-host "(do not break or close window)" -ForegroundColor Yellow     
+        Write-Host "(do not break or close window)" -ForegroundColor Yellow     
         Start-Sleep 5
 
         try {
