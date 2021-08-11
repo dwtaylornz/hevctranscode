@@ -64,11 +64,10 @@ if (test-path -PathType leaf output\$video_name) {
 
     #check video length (used for progress updates)
     $video_new_duration = $null 
-    $video_new_duration = (.\ffprobe.exe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"output\$video_name"`") | Out-String
-    $video_new_duration = $video_new_duration.trim()
-    $video_new_duration_formated = [timespan]::fromseconds($video_new_duration)
-    $video_new_duration_formated = ("{0:hh\:mm\:ss}" -f $video_new_duration_formated)                
 
+    $video_new_duration = Get-VideoDuration "output\$video_name"
+    $video_new_duration_formated = Get-VideoDurationFormatted $video_duration 
+                 
     # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formated)" 
     if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
 
@@ -100,9 +99,9 @@ if (test-path -PathType leaf output\$video_name) {
     else {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
-            Trace-Message "$job - $video_name incorrect duration on new video $video_new_duration_formated, File - NOT copied" 
+            Trace-Message "$job - $video_name incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
             Start-Sleep 2
-            Remove-Item output\$video_name
+            # Remove-Item output\$video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
             Trace-Message "$job - $video_name file size change not within limits, File - NOT copied" 
