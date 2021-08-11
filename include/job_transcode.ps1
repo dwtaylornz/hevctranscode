@@ -66,7 +66,7 @@ if (test-path -PathType leaf output\$video_name) {
     $video_new_duration = $null 
 
     $video_new_duration = Get-VideoDuration "output\$video_name"
-    $video_new_duration_formated = Get-VideoDurationFormatted $video_duration 
+    $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
                  
     # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formated)" 
     if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
