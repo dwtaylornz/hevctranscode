@@ -81,9 +81,7 @@ if (test-path -PathType leaf output\$video_name) {
     #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
     if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
-        Write-Host -NoNewline "  Sleep 5 seconds before file move "
-        Write-Host "(do not break or close window)" -ForegroundColor Yellow     
-        Start-Sleep 5
+        Start-delay
 
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
