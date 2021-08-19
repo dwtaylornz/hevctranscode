@@ -12,11 +12,7 @@ Import-Module ".\include\functions.psm1" -Force
 
 #map media drive 
 if ($smb_enabled) {
-    while (!(test-path -PathType container $media_path) ) {
-        Start-Sleep 2
-        Write-Host -NoNewline "Mapping Drive (smb enabled)... "     
-        net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
-    }  
+    Test-SMB ($media_path) 
 }
 
 # Setup temp output folder, and clear previous transcodes
@@ -84,6 +80,10 @@ Write-Host " "
 
 Foreach ($video in $videos) {
     
+    if ($smb_enabled) {
+        Test-SMB ($media_path) 
+    }
+
     $video_size = [math]::Round($video.length / 1GB, 2)
     
     if ($video_size -lt $min_video_size) {
