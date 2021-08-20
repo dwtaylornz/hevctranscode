@@ -87,18 +87,16 @@ function Start-Delay {
 
 }
 
-function Test-SMB ($media_path){
+function Test-SMB ($media_path) {
 
-    . .\hevc_transcode_variables.ps1    
-
+    . .\hevc_transcode_variables.ps1   
+    
     while (!(test-path -PathType container $media_path) ) {
         Start-Sleep 2
         Write-Host -NoNewline "Mapping Drive (smb enabled)... "     
         net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
     }  
 
-}
-    
-
+} 
 
 Export-ModuleMember -Function *
