@@ -35,7 +35,7 @@ if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) {
 
 #GPU Offload...
 if ($video_codec -ne "hevc") { 
-    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size) transcoding via $ffmpeg_codec..."            
+    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) transcoding via $ffmpeg_codec..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
     If ($err -ne "") { Trace-Error "$job - $video_name $err" }
@@ -72,9 +72,9 @@ if (test-path -PathType leaf output\$video_name) {
     if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
 
     # Write-Host "$job Job - $video_name"
-    if ($video_new_size -ne 0) {
-        Trace-Message "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
-    }
+    # if ($video_new_size -ne 0) {
+    #     Trace-Message "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
+    # }
                 
     # check the file is healthy
     #confirm move file is enabled, and confirm file is 5% smaller or non-zero 
