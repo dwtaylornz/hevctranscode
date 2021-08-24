@@ -70,17 +70,13 @@ if (test-path -PathType leaf output\$video_name) {
                  
     # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formated)" 
     if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
-
-    # Write-Host "$job Job - $video_name"
-    # if ($video_new_size -ne 0) {
-    #     Trace-Message "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
-    # }
-                
+              
     # check the file is healthy
     #confirm move file is enabled, and confirm file is 5% smaller or non-zero 
     #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
     if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
+        Trace-Message "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent percent"
         Start-delay
 
         try {
