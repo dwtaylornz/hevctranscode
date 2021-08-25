@@ -81,7 +81,7 @@ if ( [bool](get-job -Name $job -ea silentlycontinue) ) {
 
 function Start-Delay {
 
-    Write-Host -NoNewline "  Sleep 5 seconds before file move "
+    Write-Host -NoNewline "  Waiting 5 seconds before file move "
     Write-Host "(do not break or close window)" -ForegroundColor Yellow     
     Start-Sleep 5
 

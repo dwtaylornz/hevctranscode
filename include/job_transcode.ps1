@@ -35,7 +35,7 @@ if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) {
 
 #GPU Offload...
 if ($video_codec -ne "hevc") { 
-    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) transcoding via $ffmpeg_codec..."            
+    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding via $ffmpeg_codec..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
     If ($err -ne "") { Trace-Error "$job - $video_name $err" }
