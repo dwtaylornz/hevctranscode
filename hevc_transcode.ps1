@@ -30,7 +30,6 @@ if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) 
     $videos = Import-Csv -Path .\scan_results.csv -Encoding utf8
     $file_count = $videos.Count
     Write-Host "Done ($file_count)" 
-  
 }
 
 else {
