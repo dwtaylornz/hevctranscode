@@ -27,10 +27,15 @@ $start_time = (GET-Date)
 # NVIDIA TUNING - disable NVDEC 
 #if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
 
-$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
+if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
+if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
+if ($convert_1080p -eq 1) { $ffmpeg_cmd_scale = "-vf scale=1920:-1" } 
+
+# Main FFMPEG Params 
+$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) { 
-    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" -vf scale=1920:-1 -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
+    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" $ffmpeg_cmd_scale -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 }
 
 #GPU Offload...
@@ -76,12 +81,12 @@ if (test-path -PathType leaf output\$video_name) {
     #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
     if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
-        Trace-Message "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent%"
+        Trace-Message "$job - $video_name Transcode time: $total_time_formated, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         Start-delay
 
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
-            Trace-Savings "$job - $video_name Transcode time : $total_time_formated, GB Saved : $diff ($video_size -> $video_new_size) or $diff_percent%"
+            Trace-Savings "$job - $video_name Transcode time: $total_time_formated, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         }
         catch {
             Trace-Message "Error moving $video_name back to source location - Check permissions"

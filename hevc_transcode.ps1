@@ -121,7 +121,9 @@ Foreach ($video in $videos) {
 
                 # If thread not running then i can run it here 
                 if ($gpu_state -ne "Running") {
-                    Start-Job -Name "GPU-Transcode-$thread" -FilePath .\include\job_transcode.ps1 -ArgumentList $RootDir, $video, "GPU($thread)" | Out-Null 
+                    if ($ffmpeg_hwdec -eq 1){$hw = "DE"}
+                    else {$hw= "E"}
+                    Start-Job -Name "GPU-Transcode-$thread" -FilePath .\include\job_transcode.ps1 -ArgumentList $RootDir, $video, "GPU($thread$hw)" | Out-Null 
                     $done = 1 
                     break
                 }       
