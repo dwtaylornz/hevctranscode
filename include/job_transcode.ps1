@@ -53,9 +53,9 @@ $time = $end_time - $start_time
 $time_hours = $time.hours
 $time_mins = $time.minutes
 $time_secs = $time.seconds
-$total_time_formated = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
+$total_time_formatted = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
 if ($time_hours -eq 0) {
-    $total_time_formated = "$time_mins" + ":" + "$time_secs" 
+    $total_time_formatted = "$time_mins" + ":" + "$time_secs" 
 }
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
@@ -76,7 +76,7 @@ if (test-path -PathType leaf output\$video_name) {
     $video_new_duration = Get-VideoDuration "output\$video_name"
     $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
                  
-    # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formated)" 
+    # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formatted)" 
     if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
               
     # check the file is healthy
@@ -84,12 +84,12 @@ if (test-path -PathType leaf output\$video_name) {
     #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
     if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
-        Trace-Message "$job - $video_name Transcode time: $total_time_formated, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
+        Trace-Message "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         Start-delay
 
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
-            Trace-Savings "$job - $video_name Transcode time: $total_time_formated, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
+            Trace-Savings "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         }
         catch {
             Trace-Message "Error moving $video_name back to source location - Check permissions"
