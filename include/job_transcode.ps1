@@ -10,7 +10,7 @@ Import-Module ".\include\functions.psm1" -Force
 #write-host "start-transcode" 
 $video_name = $video.name
 $video_path = $video.Fullname
-$video_size = [math]::Round($video.length / 1GB, 2)
+$video_size = [math]::Round($video.length / 1GB, 1)
 
 #Write-Host "Check if file is HEVC first..."
 $video_codec = Get-VideoCodec $video_path
@@ -52,11 +52,10 @@ $end_time = (GET-Date)
 $time = $end_time - $start_time
 $time_hours = $time.hours
 $time_mins = $time.minutes
-$time_secs = $time.seconds
+$time_secs = $time.seconds 
+if ($time_secs -lt 10) { $time_secs = "0$time_secs" }
 $total_time_formatted = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
-if ($time_hours -eq 0) {
-    $total_time_formatted = "$time_mins" + ":" + "$time_secs" 
-}
+if ($time_hours -eq 0) { $total_time_formatted = "$time_mins" + ":" + "$time_secs" }
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
 
@@ -64,11 +63,11 @@ if (test-path -PathType leaf output\$video_name) {
 
     #check size of new file 
     $video_new = Get-ChildItem output\$video_name | Select-Object Fullname, extension, length
-    $video_new_size = [math]::Round($video_new.length / 1GB, 2)
+    $video_new_size = [math]::Round($video_new.length / 1GB, 1)
     $diff = $video_size - $video_new_size
-    $diff = [math]::Round($diff, 2)
+    $diff = [math]::Round($diff, 1)
     
-    $diff_percent = [math]::Round((1 - ($video_new_size / $video_size)) * 100, 2)
+    $diff_percent = [math]::Round((1 - ($video_new_size / $video_size)) * 100, 0)
 
     #check video length (used for progress updates)
     $video_new_duration = $null 
