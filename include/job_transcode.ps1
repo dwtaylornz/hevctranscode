@@ -54,6 +54,9 @@ $time_hours = $time.hours
 $time_mins = $time.minutes
 $time_secs = $time.seconds
 $total_time_formated = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
+if ($time_hours -eq 0) {
+    $total_time_formated = "$time_mins" + ":" + "$time_secs" 
+}
 
 # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
 

@@ -74,7 +74,7 @@ Trace-Message "Total videos to process : $video_count"
 if ((test-path -PathType leaf skip.log)) { $skipped_files = Get-Content -Path skip.log }
 else { $skipped_files = "" }
 
-get-job -State Running
+get-job -State Running | Select-Object Name, State
 Write-Host " "
 
 Foreach ($video in $videos) {
