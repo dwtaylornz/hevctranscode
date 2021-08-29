@@ -7,7 +7,7 @@ A windows powershell script to re-encode media library videos to HEVC / H265 usi
 
 ### usage 
 - Download and place ffmpeg tools in same folder as script 
-- Rename variables example file to hevc_transcode_variables.ps1 and update variables!
+- Update hevc_transcode_variables.ps1 with your settings
 - Run hevc_transcode.ps1 in powershell 
 
 ### warning! 
