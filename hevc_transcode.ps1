@@ -36,9 +36,7 @@ Foreach ($video in $videos) {
     
     if ($video_size -lt $min_video_size) { Wait-Quit }
 
-    $video_name = $video.name
-
-    if ($video_name -notin $skipped_files) {
+    if ($($video.name) -notin $skipped_files) {
 
         while ($true) {
 

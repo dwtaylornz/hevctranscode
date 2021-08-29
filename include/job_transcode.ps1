@@ -7,8 +7,6 @@ Import-Module ".\include\functions.psm1" -Force
 # Get-Variables
 . .\variables.ps1
 
-
-
 #write-host "start-transcode" 
 $video_name = $video.name
 $video_path = $video.Fullname
