@@ -34,7 +34,7 @@ $start_time = (GET-Date)
 
 if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
 if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
-if ($convert_1080p -eq 1) { $ffmpeg_cmd_scale = "-vf scale=1920:-1" } 
+if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_cmd_scale = "-vf scale=1920:-1" } 
 if ($convert_1080p -eq 0) { $ffmpeg_cmd_scale = $null } 
 
 # Main FFMPEG Params 
