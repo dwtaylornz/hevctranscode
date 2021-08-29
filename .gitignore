@@ -1,7 +1,7 @@
-hevc_transcode_variables.ps1
 output
 compare
 backup
+test
 ffmpeg.exe
 ffplay.exe
 ffprobe.exe

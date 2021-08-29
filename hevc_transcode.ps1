@@ -4,16 +4,13 @@
 # script will continously loop through videos transcoding to HEVC
 # populate hevc_transcode_variables.ps1 before running this script. 
 
+Clear-Host
+
 $RootDir = Get-Location
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
 . .\hevc_transcode_variables.ps1
-
-#map media drive 
-if ($smb_enabled) {
-    Test-SMB ($media_path) 
-}
 
 # Setup temp output folder, and clear previous transcodes
 if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }
@@ -26,16 +23,16 @@ Write-Host " "
 if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
     Write-Host  -NoNewline "Running file scan..." 
     Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
-    Receive-Job -name "Scan" -wait
-    start-sleep 1
-    $videos = Import-Csv -Path .\scan_results.csv -Encoding utf8
+    Receive-Job -name "Scan" -wait -Force
+    Start-Sleep 2 
+    $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
     $file_count = $videos.Count
     Write-Host "Done ($file_count)" 
 }
 
 else {
     Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
-    $videos = Import-Csv -Path .\scan_results.csv -Encoding utf8
+    $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
     $file_count = $videos.Count
     Write-Host "Done ($file_count)" 
         
@@ -75,26 +72,13 @@ Trace-Message "Total videos to process : $video_count"
 if ((test-path -PathType leaf skip.log)) { $skipped_files = Get-Content -Path skip.log }
 else { $skipped_files = "" }
 
-get-job -State Running 
+Show-State
 
 Foreach ($video in $videos) {
-    
-    if ($smb_enabled) {
-        Test-SMB ($media_path) 
-    }
 
     $video_size = [math]::Round($video.length / 1GB, 2)
     
-    if ($video_size -lt $min_video_size) {
-        Trace-Message "ALL DONE - Video smaller than defined $min_video_size, waiting for jobs to finish then quiting"
-
-        while (get-job -State Running -ea silentlycontinue) {
-            Start-Sleep 1
-            Receive-Job *
-        }   
-        Trace-Message "exiting"
-        Break
-    }
+    if ($video_size -lt $min_video_size) { Wait-Quit }
 
     $video_name = $video.name
 
@@ -114,19 +98,20 @@ Foreach ($video in $videos) {
                     remove-job -name "GPU-Transcode-$thread" -Force 
                 }   
 
-                # Output existing jobs 
-                if ($gpu_state -eq "Running" ) { 
-                    Receive-Job -name "GPU-Transcode-$thread" 
-                }   
-
                 # If thread not running then i can run it here 
                 if ($gpu_state -ne "Running") {
-                    if ($ffmpeg_hwdec -eq 1){$hw = "DE"}
-                    else {$hw= "E"}
+                    if ($ffmpeg_hwdec -eq 1) { $hw = "DE" }
+                    else { $hw = "E" }
                     Start-Job -Name "GPU-Transcode-$thread" -FilePath .\include\job_transcode.ps1 -ArgumentList $RootDir, $video, "GPU($thread$hw)" | Out-Null 
                     $done = 1 
                     break
                 }       
+
+                # Output existing jobs 
+                if ($gpu_state -eq "Running" ) { 
+                    Receive-Job -name "GPU-Transcode-$thread" 
+                }  
+
                    
             }          
 
@@ -135,3 +120,4 @@ Foreach ($video in $videos) {
 
     }
 }
+Wait-Quit

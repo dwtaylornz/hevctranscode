@@ -7,10 +7,15 @@ Import-Module ".\include\functions.psm1" -Force
 # Get-Variables
 . .\hevc_transcode_variables.ps1
 
+
+
 #write-host "start-transcode" 
 $video_name = $video.name
 $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 1)
+
+#Add to skip file so it is not processed again 
+Write-Skip $video_name
 
 #Write-Host "Check if file is HEVC first..."
 $video_codec = Get-VideoCodec $video_path
@@ -30,13 +35,10 @@ $start_time = (GET-Date)
 if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
 if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
 if ($convert_1080p -eq 1) { $ffmpeg_cmd_scale = "-vf scale=1920:-1" } 
+if ($convert_1080p -eq 0) { $ffmpeg_cmd_scale = $null } 
 
 # Main FFMPEG Params 
-$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
-
-if ($convert_1080p -eq 1 -AND $video_width -gt 1920 ) { 
-    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y -i ""$video_path"" $ffmpeg_cmd_scale -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
-}
+$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_cmd_scale -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 
 #GPU Offload...
 if ($video_codec -ne "hevc") { 
@@ -121,4 +123,3 @@ Else {
     }
     else { Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" }                                
 }     
-Write-Skip $video_name

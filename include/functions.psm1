@@ -71,11 +71,11 @@ function Get-VideoDurationFormatted ([string] $video_duration) {
 }
 
 function Get-JobStatus ([string] $job) {
-# Write-Host "Checking for any existing running jobs..." 
-if ( [bool](get-job -Name $job -ea silentlycontinue) ) {
-    $state = (get-job -Name $job).State 
-    # if ($state -eq "Running") { Write-Host "$job Job - Please wait, job already exists and Running"  -ForegroundColor Yellow }
-    return $state
+    # Write-Host "Checking for any existing running jobs..." 
+    if ( [bool](get-job -Name $job -ea silentlycontinue) ) {
+        $state = (get-job -Name $job).State 
+        # if ($state -eq "Running") { Write-Host "$job Job - Please wait, job already exists and Running"  -ForegroundColor Yellow }
+        return $state
     }
 }
 
@@ -87,16 +87,38 @@ function Start-Delay {
 
 }
 
-function Test-SMB ($media_path) {
+function Show-State () {
 
     . .\hevc_transcode_variables.ps1   
-    
-    while (!(test-path -PathType container $media_path) ) {
-        Start-Sleep 2
-        Write-Host -NoNewline "Mapping Drive (smb enabled)... "     
-        net use $smb_driveletter \\$smb_server\$smb_share /user:$smb_user $smb_password | Out-Null   
-    }  
+    Write-Host ""
+    Write-Host -NoNewLine "Settings - " 
+    Write-Host -NoNewline "GPU Type: "
+    Write-Host -NoNewLine -ForegroundColor Green "$ffmpeg_codec"
+    if ($ffmpeg_hwdec -eq 1) {
+        Write-Host -NoNewline " GPU Decoding: "
+        Write-Host -noNewLine -ForegroundColor Green "Enabled"
+    }
+       
+    Write-Host ""    
+    Write-Host ""   
+         
+    if ((get-job -State Running -ea silentlycontinue) ) {
+        Write-Host "Currently Running Jobs - "
 
-} 
+        get-job -State Running 
+        Write-Host ""
+    }
+
+
+}
+
+function Wait-Quit (){
+    Trace-Message "ALL DONE - waiting for running jobs to finish then quiting"
+    while (get-job -State Running -ea silentlycontinue) {
+    Start-Sleep 1
+    Receive-Job *
+}   
+Trace-Message "exiting"
+}
 
 Export-ModuleMember -Function *
