@@ -130,20 +130,21 @@ function Initialize-Folders() {
 function Invoke-Scan() {
     . .\variables.ps1  
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
-        Write-Host  -NoNewline "Running file scan..." 
+        Write-Host  -NoNewline "Running file scan... " 
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         Receive-Job -name "Scan" -wait -Force
         Start-Sleep 2 
         $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
-        Write-Host "Done ($file_count)" 
+        return $file_count
     }
     
     else {
-        Write-Host -NoNewline "Getting previous scan results & running new scan in background..." 
+        Write-Host -NoNewline "Getting previous scan results & running new scan in background: " 
         $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
-        Write-Host "Done ($file_count)" 
+        Write-Host $file_count
+        return $file_count
             
         if ((get-job -Name Scan -ea silentlycontinue) ) {
             $scan_state = (get-job -Name Scan).State 
@@ -169,23 +170,24 @@ function Invoke-HealthCheck() {
 
 function Show-Skip() {
 
-    Write-Host -NoNewline "Getting previously skipped or completed files..." 
+    Write-Host -NoNewline "Getting previously skipped or completed files: " 
     if ((test-path -PathType leaf skip.log)) { 
         $skipped_files = @(Get-Content -Path skip.log)
         $skip_count = $skipped_files.Count
     }
     else { $skip_count = 0 }
+   Write-Host "$skip_count"
+    return $skip_count 
 }
 
 function Show-ToProcess() {
 
     $video_count = ($file_count - $skip_count)
-    Write-Host "Done ($skip_count)"
-    Write-Host ""
-    Trace-Message "Total videos to process : $video_count"
+        
+    Write-Host "Total videos to process: $video_count"
+    
+    return $video_count
 
-    if ((test-path -PathType leaf skip.log)) { $skipped_files = Get-Content -Path skip.log }
-    else { $skipped_files = "" }
 }
 
 Export-ModuleMember -Function *

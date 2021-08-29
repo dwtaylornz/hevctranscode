@@ -15,16 +15,52 @@ Import-Module ".\include\functions.psm1" -Force
 Initialize-Folders
   
 # run Scan job at $media_path or retrive videos from .\scan_results
-Invoke-Scan
+# Invoke-Scan
+if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
+    Write-Host  -NoNewline "Running file scan... " 
+    Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
+    Receive-Job -name "Scan" -wait -Force
+    Start-Sleep 2 
+    $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
+    $file_count = $videos.Count
+}
+
+else {
+    Write-Host -NoNewline "Getting previous scan results & running new scan in background: " 
+    $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
+    $file_count = $videos.Count
+    Write-Host $file_count
+        
+    if ((get-job -Name Scan -ea silentlycontinue) ) {
+        $scan_state = (get-job -Name Scan).State 
+        if ($scan_state -ne "Running") { 
+            Remove-job Scan
+            Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
+        }
+    }
+
+    else {
+        Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
+    }
+}
 
 # run health check job 
 Invoke-HealthCheck
 
-# Get previously skipped files from skip.log 
-Show-Skip
+# Get previously skipped files from skip.log
+# Show-Skip
+Write-Host -NoNewline "Getting previously skipped or completed files: " 
+if ((test-path -PathType leaf skip.log)) { 
+    $skipped_files = @(Get-Content -Path skip.log)
+    $skip_count = $skipped_files.Count
+}
+else { $skip_count = 0 }
+Write-Host "$skip_count"
     
 # Show total videos to process (scanned files - skip count) 
-Show-ToProcess
+# Show-ToProcess
+$video_count = ($file_count - $skip_count) 
+Write-Host "Total videos to process: $video_count"
 
 #Show settings and any jobs running 
 Show-State
