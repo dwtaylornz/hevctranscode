@@ -2,7 +2,7 @@
 # github.com/dwtaylornz/hevctranscode
 #
 # script will continously loop through videos transcoding to HEVC
-# populate hevc_transcode_variables.ps1 before running this script. 
+# populate variables.ps1 before running this script. 
 
 Clear-Host
 
@@ -10,7 +10,7 @@ $RootDir = Get-Location
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
-. .\hevc_transcode_variables.ps1
+. .\variables.ps1
 
 # Setup temp output folder, and clear previous transcodes
 if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }

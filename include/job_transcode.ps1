@@ -5,7 +5,7 @@ $job = $args[2]
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
-. .\hevc_transcode_variables.ps1
+. .\variables.ps1
 
 
 

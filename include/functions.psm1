@@ -89,7 +89,7 @@ function Start-Delay {
 
 function Show-State () {
 
-    . .\hevc_transcode_variables.ps1   
+    . .\variables.ps1   
     Write-Host ""
     Write-Host -NoNewLine "Settings - " 
     Write-Host -NoNewline "GPU Type: "
