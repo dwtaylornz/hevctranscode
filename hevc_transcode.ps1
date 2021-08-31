@@ -21,14 +21,7 @@ $file_count, $videos = Get-Videos
 Invoke-HealthCheck
 
 # Get previously skipped files from skip.log
-# Show-Skip
-Write-Host -NoNewline "Getting previously skipped or completed files: " 
-if ((test-path -PathType leaf skip.log)) { 
-    $skipped_files = @(Get-Content -Path skip.log)
-    $skip_count = $skipped_files.Count
-}
-else { $skip_count = 0 }
-Write-Host "$skip_count"
+$skip_count = Get-Skip
     
 # Show total videos to process (scanned files - skip count) 
 # Show-ToProcess

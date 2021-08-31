@@ -169,7 +169,7 @@ function Invoke-HealthCheck() {
 
 }
 
-function Show-Skip() {
+function Get-Skip() {
 
     Write-Host -NoNewline "Getting previously skipped or completed files: " 
     if ((test-path -PathType leaf skip.log)) { 
