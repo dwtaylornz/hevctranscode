@@ -127,7 +127,7 @@ function Initialize-Folders() {
 
 }
 
-function Invoke-Scan() {
+function Get-Videos() {
     . .\variables.ps1  
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
         Write-Host  -NoNewline "Running file scan... " 
@@ -136,7 +136,6 @@ function Invoke-Scan() {
         Start-Sleep 2 
         $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
-        return $file_count
     }
     
     else {
@@ -144,7 +143,7 @@ function Invoke-Scan() {
         $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
         Write-Host $file_count
-        return $file_count
+       
             
         if ((get-job -Name Scan -ea silentlycontinue) ) {
             $scan_state = (get-job -Name Scan).State 
@@ -158,6 +157,8 @@ function Invoke-Scan() {
             Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
         }
     }
+
+    return $file_count, $videos
 }
 
 function Invoke-HealthCheck() {
@@ -176,7 +177,7 @@ function Show-Skip() {
         $skip_count = $skipped_files.Count
     }
     else { $skip_count = 0 }
-   Write-Host "$skip_count"
+    Write-Host "$skip_count"
     return $skip_count 
 }
 
