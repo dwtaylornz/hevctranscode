@@ -24,9 +24,7 @@ Invoke-HealthCheck
 $skip_count = Get-Skip
     
 # Show total videos to process (scanned files - skip count) 
-# Show-ToProcess
-$video_count = ($file_count - $skip_count) 
-Write-Host "Total videos to process: $video_count"
+Get-VideosToProcess($file_count, $skip_count)
 
 #Show settings and any jobs running 
 Show-State

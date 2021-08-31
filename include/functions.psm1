@@ -181,13 +181,13 @@ function Get-Skip() {
     return $skip_count 
 }
 
-function Show-ToProcess() {
+function Get-VideosToProcess($file_count, $skip_count) {
 
     $video_count = ($file_count - $skip_count)
         
     Write-Host "Total videos to process: $video_count"
     
-    return $video_count
+    # return $video_count
 
 }
 
