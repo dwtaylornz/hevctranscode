@@ -178,15 +178,13 @@ function Get-Skip() {
     }
     else { $skip_count = 0 }
     Write-Host "$skip_count"
-    return $skip_count 
+    return $skip_count, $skipped_files
 }
 
 function Get-VideosToProcess($file_count, $skip_count) {
 
     $video_count = ($file_count - $skip_count)
-        
     Write-Host "Total videos to process: $video_count"
-    
 }
 
 Export-ModuleMember -Function *

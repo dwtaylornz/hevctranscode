@@ -1,7 +1,7 @@
 # powershell 
 # github.com/dwtaylornz/hevctranscode
 #
-# script will continously loop through videos transcoding to HEVC
+# script will loop through largest to smallest videos transcoding to HEVC
 # populate variables.ps1 before running this script. 
 
 Clear-Host
@@ -21,10 +21,12 @@ $file_count, $videos = Get-Videos
 Invoke-HealthCheck
 
 # Get previously skipped files from skip.log
-$skip_count = Get-Skip
+$skip_count, $skipped_files = Get-Skip
     
 # Show total videos to process (scanned files - skip count) 
-Get-VideosToProcess($file_count, $skip_count)
+# Get-VideosToProcess($file_count, $skip_count)
+$video_count = ($file_count - $skip_count)
+Write-Host "Total videos to process: $video_count"
 
 #Show settings and any jobs running 
 Show-State
