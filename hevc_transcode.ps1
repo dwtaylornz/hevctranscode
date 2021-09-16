@@ -5,7 +5,10 @@
 # populate variables.ps1 before running this script. 
 
 Clear-Host
-$RootDir = Get-Location
+Set-Location -Path $PSScriptRoot
+$RootDir = $PSScriptRoot
+if (!$RootDir){$RootDir = Split-Path $MyInvocation.MyCommand.Path} 
+
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
