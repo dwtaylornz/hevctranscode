@@ -39,7 +39,16 @@ Foreach ($video in $videos) {
 
     $video_size = [math]::Round($video.length / 1GB, 2)
     
-    if ($video_size -lt $min_video_size) { Wait-Quit }
+    if ($video_size -lt $min_video_size) { 
+        Trace-Message "HIT VIDEO SIZE LIMIT - waiting for running jobs to finish then quiting"
+        while (get-job -State Running -ea silentlycontinue) {
+            Start-Sleep 1
+            Receive-Job *
+        }   
+        Trace-Message "exiting"
+        Read-Host -Prompt "Press any key to continue"
+        exit
+     }
 
     if ($($video.name) -notin $skipped_files) {
 
@@ -75,4 +84,11 @@ Foreach ($video in $videos) {
         }
     }
 }
-Wait-Quit
+Trace-Message "ALL DONE - waiting for running jobs to finish then quiting"
+while (get-job -State Running -ea silentlycontinue) {
+    Start-Sleep 1
+    Receive-Job *
+}   
+Trace-Message "exiting"
+Read-Host -Prompt "Press any key to continue"
+exit

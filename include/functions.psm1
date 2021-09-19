@@ -98,8 +98,8 @@ function Show-State () {
         Write-Host -NoNewline " GPU Decoding: "
         Write-Host -noNewLine -ForegroundColor Green "Enabled"
     }
-    Write-Host -NoNewline " Exec Path: " 
-    Write-Host -NoNewLine -ForegroundColor Green "$RootDir"
+    # Write-Host -NoNewline " Exec Path: " 
+    # Write-Host -NoNewLine -ForegroundColor Green "$RootDir"
        
     Write-Host ""    
     Write-Host ""   
@@ -110,16 +110,6 @@ function Show-State () {
         get-job -State Running 
         Write-Host ""
     }
-}
-
-function Wait-Quit () {
-    Trace-Message "ALL DONE - waiting for running jobs to finish then quiting"
-    while (get-job -State Running -ea silentlycontinue) {
-        Start-Sleep 1
-        Receive-Job *
-    }   
-    Trace-Message "exiting"
-    exit
 }
 
 function Initialize-Folders() {
