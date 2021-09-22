@@ -123,6 +123,7 @@ function Initialize-Folders() {
 function Get-Videos() {
     . .\variables.ps1  
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
+        Stop-Job Scan
         Write-Host  -NoNewline "Running file scan... " 
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         Receive-Job -name "Scan" -wait -Force
