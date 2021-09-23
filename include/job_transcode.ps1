@@ -43,7 +43,10 @@ if ($video_codec -ne "hevc") {
     Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding via $ffmpeg_codec..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
-    If ($err -ne "") { Trace-Error "$job - $video_name $err" }
+    If ($err -ne "") { 
+        Trace-Error "$job - $video_name $err" 
+
+}
 }
 
 $end_time = (GET-Date)
@@ -111,6 +114,7 @@ if (test-path -PathType leaf output\$video_name) {
         }
         elseif ($move_file -eq 0) { Trace-Message "$job - $video_name move file disabled, File - NOT copied" }
         else { Trace-Message "$job - $video_name File - NOT copied" }
+        Write-SkipError $video_name
     }            
 }
 

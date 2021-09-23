@@ -31,6 +31,14 @@ function Write-Skip ([string] $video_name) {
     }
 }
 
+function Write-SkipError ([string] $video_name) {
+    $mtx5 = New-Object System.Threading.Mutex($false, "SkipErrorMutex")
+    If ($mtx5.WaitOne(1000)) {
+        Write-Output "$video_name" >> .\skiperror.log
+        [void]$mtx5.ReleaseMutex()
+    }
+}
+
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
@@ -123,7 +131,7 @@ function Initialize-Folders() {
 function Get-Videos() {
     . .\variables.ps1  
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
-        Stop-Job Scan
+        Stop-Job Scan -ea silentlycontinue
         Write-Host  -NoNewline "Running file scan... " 
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         Receive-Job -name "Scan" -wait -Force
@@ -173,6 +181,18 @@ function Get-Skip() {
     else { $skip_count = 0 }
     Write-Host "$skip_count"
     return $skip_count, $skipped_files
+}
+
+function Get-SkipError() {
+
+    Write-Host -NoNewline "Getting previously skipped (error) or completed files: " 
+    if ((test-path -PathType leaf skiperror.log)) { 
+        $skippederror_files = @(Get-Content -Path skiperror.log)
+        $skiperror_count = $skippederror_files.Count
+    }
+    else { $skiperror_count = 0 }
+    Write-Host "$skiperror_count"
+    return $skiperror_count, $skippederror_files
 }
 
 function Get-VideosToProcess($file_count, $skip_count) {
