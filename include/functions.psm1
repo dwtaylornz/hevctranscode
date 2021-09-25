@@ -153,6 +153,7 @@ function Get-Videos() {
         $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
         Write-Host $file_count
+        Write-Host ""
        
             
         if ((get-job -Name Scan -ea silentlycontinue) ) {
@@ -181,7 +182,7 @@ function Invoke-HealthCheck() {
 
 function Get-Skip() {
 
-    Write-Host -NoNewLine "Getting previously skipped or completed files: " 
+    Write-Host -NoNewLine "Getting previously processed files: " 
     if ((test-path -PathType leaf skip.log)) { 
         $skipped_files = @(Get-Content -Path skip.log)
         $skip_count = $skipped_files.Count
@@ -193,7 +194,7 @@ function Get-Skip() {
 
 function Get-SkipError() {
 
-    Write-Host -NoNewLine "Getting previously skipped (error) or completed files: " 
+    Write-Host -NoNewLine "Getting previously skipped (error) files: " 
     if ((test-path -PathType leaf skiperror.log)) { 
         $skippederror_files = @(Get-Content -Path skiperror.log)
         $skiperror_count = $skippederror_files.Count
@@ -203,9 +204,22 @@ function Get-SkipError() {
     return $skiperror_count, $skippederror_files
 }
 
+function Get-SkipHEVC() {
+
+    Write-Host -NoNewLine "Getting previously skipped (HEVC) files: " 
+    if ((test-path -PathType leaf skiphevc.log)) { 
+        $skippedhevc_files = @(Get-Content -Path skiphevc.log)
+        $skiphevc_count = $skippedhevc_files.Count
+    }
+    else { $skiphevc_count = 0 }
+    Write-Host "$skiphevc_count"
+    return $skiphevc_count, $skippedhevc_files
+}
+
 function Get-VideosToProcess($file_count, $skip_count) {
 
     $video_count = ($file_count - $skip_count)
+    Write-Host ""
     Write-Host "Total videos to process: $video_count"
 }
 
