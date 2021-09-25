@@ -39,6 +39,14 @@ function Write-SkipError ([string] $video_name) {
     }
 }
 
+function Write-SkipHEVC ([string] $video_name) {
+    $mtx6 = New-Object System.Threading.Mutex($false, "SkipHEVCMutex")
+    If ($mtx6.WaitOne(1000)) {
+        Write-Output "$video_name" >> .\skiphevc.log
+        [void]$mtx6.ReleaseMutex()
+    }
+}
+
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
@@ -173,7 +181,7 @@ function Invoke-HealthCheck() {
 
 function Get-Skip() {
 
-    Write-Host -NoNewline "Getting previously skipped or completed files: " 
+    Write-Host -NoNewLine "Getting previously skipped or completed files: " 
     if ((test-path -PathType leaf skip.log)) { 
         $skipped_files = @(Get-Content -Path skip.log)
         $skip_count = $skipped_files.Count
@@ -185,7 +193,7 @@ function Get-Skip() {
 
 function Get-SkipError() {
 
-    Write-Host -NoNewline "Getting previously skipped (error) or completed files: " 
+    Write-Host -NoNewLine "Getting previously skipped (error) or completed files: " 
     if ((test-path -PathType leaf skiperror.log)) { 
         $skippederror_files = @(Get-Content -Path skiperror.log)
         $skiperror_count = $skippederror_files.Count

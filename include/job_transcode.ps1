@@ -121,6 +121,8 @@ if (test-path -PathType leaf output\$video_name) {
 Else {   
     if ($video_codec -eq "hevc") {
         Trace-Message  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already HEVC, Skipping" 
+        Write-SkipHEVC $video_name
+
         
     }
     else { Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" }                                
