@@ -4,7 +4,8 @@
 $media_path = "Z:\videos\" # path in SMB share (must include trailing backslash) 
 
 # Scanning 
-$scan_at_start = 0 # wait for scan files to complete at start of script
+$scan_at_start = 0
+ # wait for scan files to complete at start of script
 $run_health_check = 0 # also run quick health check of videos 
 
 # transcode and processing 
