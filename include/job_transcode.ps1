@@ -92,6 +92,7 @@ if (test-path -PathType leaf output\$video_name) {
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
             Trace-Savings "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
+            Write-SkipHEVC $video_name
         }
         catch {
             Trace-Message "Error moving $video_name back to source location - Check permissions"
