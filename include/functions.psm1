@@ -146,6 +146,7 @@ function Get-Videos() {
         Start-Sleep 2 
         $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
+        Write-Host " files: " $file_count
     }
     
     else {
