@@ -35,6 +35,9 @@ if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_cmd_scale = "-vf scale=1920:-1" } 
 if ($convert_1080p -eq 0) { $ffmpeg_cmd_scale = $null } 
 
+#check path 
+Test-VideoPath $video_path
+
 # Main FFMPEG Params 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_cmd_scale -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 

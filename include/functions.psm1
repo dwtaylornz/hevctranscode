@@ -224,4 +224,17 @@ function Get-VideosToProcess($file_count, $skip_count) {
     Write-Host "Total videos to process: $video_count"
 }
 
+function Test-VideoPath($path) {
+
+    $check = test-path "$path"
+
+    while ($check -eq $false) {
+        start-sleep 2
+        write-host "Cannot get to path?..."
+        $check = test-path "$path"
+    }
+
+
+}
+
 Export-ModuleMember -Function *
