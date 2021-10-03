@@ -23,7 +23,7 @@ $file_count, $videos = Get-Videos
 Invoke-HealthCheck
 
 # Get previously skipped files from skip.log
-$skip_count, $skipped_files = Get-Skip
+# $skip_count, $skipped_files = Get-Skip
 $skiperror_count, $skippederror_files = Get-SkipError
 $skiphevc_count, $skippedhevc_files = Get-SkipHEVC
 
@@ -32,6 +32,7 @@ $skiptotal_files = $skiptotal_files + $skippederror_files + $skippedhevc_files
     
 # Show total videos to process (scanned files - skip count) 
 # Get-VideosToProcess($file_count, $skip_count)
+Write-Host ""
 $video_count = ($file_count - $skiptotal_count)
 Write-Host "Total videos to process: $video_count"
 

@@ -13,7 +13,7 @@ $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 1)
 
 #Add to skip file so it is not processed again 
-Write-Skip $video_name
+# Write-Skip $video_name
 
 #Write-Host "Check if file is HEVC first..."
 $video_codec = Get-VideoCodec $video_path
@@ -36,7 +36,7 @@ if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_cmd_scale = "-vf 
 if ($convert_1080p -eq 0) { $ffmpeg_cmd_scale = $null } 
 
 #check path 
-Test-VideoPath $video_path
+# Test-VideoPath "$video_path"
 
 # Main FFMPEG Params 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_cmd_scale -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""

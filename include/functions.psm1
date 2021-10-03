@@ -138,8 +138,10 @@ function Initialize-Folders() {
 
 function Get-Videos() {
     . .\variables.ps1  
+    # get-job -State Completed | Remove-Job
+    get-job -Name Scan -ea silentlycontinue | Stop-Job -ea silentlycontinue | Out-Null
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
-        Stop-Job Scan -ea silentlycontinue
+        # Stop-Job Scan -ea silentlycontinue
         Write-Host  -NoNewline "Running file scan... " 
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         Receive-Job -name "Scan" -wait -Force
@@ -150,24 +152,14 @@ function Get-Videos() {
     }
     
     else {
+        
         Write-Host -NoNewline "Getting previous scan results & running new scan in background: " 
         $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
         Write-Host $file_count
         Write-Host ""
-       
-            
-        if ((get-job -Name Scan -ea silentlycontinue) ) {
-            $scan_state = (get-job -Name Scan).State 
-            if ($scan_state -ne "Running") { 
-                Remove-job Scan
-                Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
-            }
-        }
+        Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
     
-        else {
-            Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
-        }
     }
 
     return $file_count, $videos
