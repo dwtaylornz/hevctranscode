@@ -43,7 +43,7 @@ $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpe
 
 #GPU Offload...
 if ($video_codec -ne "hevc") { 
-    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding via $ffmpeg_codec..."            
+    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
     If ($err -ne "") { 
