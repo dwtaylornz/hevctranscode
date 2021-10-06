@@ -49,7 +49,7 @@ if ($video_codec -ne "hevc") {
     If ($err -ne "") { 
         Trace-Error "$job - $video_name $err" 
 
-}
+    }
 }
 
 $end_time = (GET-Date)
@@ -129,5 +129,8 @@ Else {
 
         
     }
-    else { Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" }                                
+    else { 
+        Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" 
+        Write-Skip $video_name
+    }                                
 }     

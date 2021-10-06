@@ -23,7 +23,7 @@ $file_count, $videos = Get-Videos
 Invoke-HealthCheck
 
 # Get previously skipped files from skip.log
-# $skip_count, $skipped_files = Get-Skip
+$skip_count, $skipped_files = Get-Skip
 $skiperror_count, $skippederror_files = Get-SkipError
 $skiphevc_count, $skippedhevc_files = Get-SkipHEVC
 
