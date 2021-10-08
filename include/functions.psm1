@@ -137,7 +137,6 @@ function Initialize-Folders() {
 }
 
 function Get-Videos() {
-    . .\variables.ps1  
     # get-job -State Completed | Remove-Job
     get-job -Name Scan -ea silentlycontinue | Stop-Job -ea silentlycontinue | Out-Null
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 

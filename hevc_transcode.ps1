@@ -5,6 +5,7 @@
 # populate variables.ps1 before running this script. 
 
 Clear-Host
+start-sleep 2
 Set-Location -Path $PSScriptRoot
 $RootDir = $PSScriptRoot
 
