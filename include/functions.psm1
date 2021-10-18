@@ -74,13 +74,10 @@ function Get-VideoDuration ([string] $video_path) {
     $video_duration = $null 
     $video_duration = (.\ffprobe.exe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
     $video_duration = $video_duration.trim()
-    $video_duration_formated = [timespan]::fromseconds($video_duration)
-    $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
     return $video_duration
 }
 
 function Get-VideoDurationFormatted ([string] $video_duration) {
-
     $video_duration_formated = [timespan]::fromseconds($video_duration)
     $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
     return $video_duration_formated
@@ -129,7 +126,6 @@ function Show-State () {
 }
 
 function Initialize-Folders() {
-
     # Setup temp output folder, and clear previous transcodes
     if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }
     if (!(test-path -PathType container logs)) { new-item -itemtype directory -force -path logs | Out-Null }    
@@ -137,6 +133,8 @@ function Initialize-Folders() {
 }
 
 function Get-Videos() {
+
+
     # get-job -State Completed | Remove-Job
     get-job -Name Scan -ea silentlycontinue | Stop-Job -ea silentlycontinue | Out-Null
     if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 

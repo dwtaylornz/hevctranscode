@@ -6,7 +6,7 @@
 
 Clear-Host
 start-sleep 2
-Set-Location -Path $PSScriptRoot
+Set-Location $PSScriptRoot
 $RootDir = $PSScriptRoot
 
 Import-Module ".\include\functions.psm1" -Force
