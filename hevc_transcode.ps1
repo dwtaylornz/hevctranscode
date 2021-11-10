@@ -4,15 +4,18 @@
 # script will loop through largest to smallest videos transcoding to HEVC
 # populate variables.ps1 before running this script. 
 
-Clear-Host
-start-sleep 2
 Set-Location $PSScriptRoot
 $RootDir = $PSScriptRoot
+if ($RootDir -eq ""){
+    $RootDir = $pwd
+}
+
+
 
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
-. .\variables.ps1
+. (Join-Path $RootDir variables.ps1)
 
 # Setup temp output folder, and clear previous transcodes
 Initialize-Folders

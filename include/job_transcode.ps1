@@ -4,8 +4,13 @@ $job = $args[2]
 
 Import-Module ".\include\functions.psm1" -Force
 
+$RootDir = $PSScriptRoot
+if ($RootDir -eq ""){
+    $RootDir = $pwd
+}
+
 # Get-Variables
-. .\variables.ps1
+. (Join-Path $RootDir variables.ps1)
 
 #write-host "start-transcode" 
 $video_name = $video.name
