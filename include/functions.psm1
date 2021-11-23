@@ -102,12 +102,7 @@ function Start-Delay {
 
 function Show-State () {
 
-    $RootDir = $PSScriptRoot
-    if ($RootDir -eq ""){
-    $RootDir = $pwd
-    }
-
-    . (Join-Path $RootDir variables.ps1)   
+    . .\variables.ps1
     Write-Host ""
     Write-Host -NoNewLine "Settings - " 
     Write-Host -NoNewline "GPU Type: "
