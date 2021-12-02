@@ -46,7 +46,7 @@ Show-State
 #Main Loop across videos 
 Foreach ($video in $videos) {
 
-    if ($('``$video.name``') -notin $skiptotal_files) {
+    if ($($video.name) -notin $skiptotal_files) {
 
         $video_size = [math]::Round($video.length / 1GB, 2)
     
