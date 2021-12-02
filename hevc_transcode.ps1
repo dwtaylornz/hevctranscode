@@ -6,7 +6,7 @@
 
 Set-Location $PSScriptRoot
 $RootDir = $PSScriptRoot
-if ($RootDir -eq ""){
+if ($RootDir -eq "") {
     $RootDir = $pwd
 }
 
@@ -46,20 +46,20 @@ Show-State
 #Main Loop across videos 
 Foreach ($video in $videos) {
 
-    $video_size = [math]::Round($video.length / 1GB, 2)
-    
-    if ($video_size -lt $min_video_size) { 
-        Trace-Message "HIT VIDEO SIZE LIMIT - waiting for running jobs to finish then quiting"
-        while (get-job -State Running -ea silentlycontinue) {
-            Start-Sleep 1
-            Receive-Job *
-        }   
-        Trace-Message "exiting"
-        Read-Host -Prompt "Press any key to continue"
-        exit
-     }
+    if ($('``$video.name``') -notin $skiptotal_files) {
 
-    if ($($video.name) -notin $skiptotal_files) {
+        $video_size = [math]::Round($video.length / 1GB, 2)
+    
+        if ($video_size -lt $min_video_size) { 
+            Trace-Message "HIT VIDEO SIZE LIMIT - waiting for running jobs to finish then quiting"
+            while (get-job -State Running -ea silentlycontinue) {
+                Start-Sleep 1
+                Receive-Job *
+            }   
+            Trace-Message "exiting"
+            Read-Host -Prompt "Press any key to continue"
+            exit
+        }
 
         while ($true) {
 

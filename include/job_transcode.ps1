@@ -53,7 +53,6 @@ if ($video_codec -ne "hevc") {
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
     If ($err -ne "") { 
         Trace-Error "$job - $video_name $err" 
-
     }
 }
 
