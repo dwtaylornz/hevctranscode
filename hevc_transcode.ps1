@@ -32,7 +32,7 @@ $skiperror_count, $skippederror_files = Get-SkipError
 $skiphevc_count, $skippedhevc_files = Get-SkipHEVC
 
 $skiptotal_count = $skip_count + $skiperror_count + $skiphevc_count
-$skiptotal_files = $skiptotal_files + $skippederror_files + $skippedhevc_files
+$skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
     
 # Show total videos to process (scanned files - skip count) 
 # Get-VideosToProcess($file_count, $skip_count)
