@@ -10,8 +10,6 @@ if ($RootDir -eq "") {
     $RootDir = $pwd
 }
 
-
-
 Import-Module ".\include\functions.psm1" -Force
 
 # Get-Variables
