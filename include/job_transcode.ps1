@@ -72,7 +72,7 @@ if ($time_hours -eq 0) { $total_time_formatted = "$time_mins" + ":" + "$time_sec
 if (test-path -PathType leaf output\$video_name) {        
 
     #check size of new file 
-    $video_new = Get-ChildItem ""output\$video_name"" | Select-Object Fullname, extension, length
+    $video_new = Get-ChildItem output\$video_name | Select-Object Fullname, extension, length
     $video_new_size = [math]::Round($video_new.length / 1GB, 1)
     $diff = $video_size - $video_new_size
     $diff = [math]::Round($diff, 1)
@@ -82,7 +82,7 @@ if (test-path -PathType leaf output\$video_name) {
     #check video length (used for progress updates)
     $video_new_duration = $null 
 
-    $video_new_duration = Get-VideoDuration ""output\$video_name""
+    $video_new_duration = Get-VideoDuration output\$video_name
     $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
                  
     # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formatted)" 
