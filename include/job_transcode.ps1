@@ -44,7 +44,7 @@ if ($convert_1080p -eq 0) { $ffmpeg_cmd_scale = $null }
 # Test-VideoPath "$video_path"
 
 # Main FFMPEG Params 
-$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_cmd_scale -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
+$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_cmd_scale -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a copy -c:s copy -err_detect explode -gops_per_idr 1 -max_muxing_queue_size 9999 ""output\$video_name"""
 
 #GPU Offload...
 if ($video_codec -ne "hevc") { 
