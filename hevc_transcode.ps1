@@ -73,6 +73,12 @@ Foreach ($video in $videos) {
                     remove-job -name "GPU-$thread" -Force 
                 }   
 
+                # has thread run too long? 
+                #  $timeout = [$ffmpeg_timeout]::FromMinutes(1)
+                $now = Get-Date
+                Get-Job -name GPU-* | Where {$_.State -eq 'Running' -and 
+                                (($now - $_.PSBeginTime).TotalMinutes -gt $ffmpeg_timeout)} | Stop-Job
+
                 # If thread not running then i can run it here 
                 if ($gpu_state -ne "Running") {
                     if ($ffmpeg_hwdec -eq 1) { $hw = "DE" }
