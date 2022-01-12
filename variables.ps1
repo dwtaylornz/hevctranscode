@@ -4,8 +4,7 @@
 $media_path = "Z:\videos\" # path in SMB share (must include trailing backslash) 
 
 # Scanning 
-$scan_at_start = 0
- # wait for scan files to complete at start of script
+$scan_at_start = 0 # wait for scan files to complete at start of script
 $run_health_check = 0 # also run quick health check of videos 
 
 # transcode and processing 
@@ -15,5 +14,5 @@ $ffmpeg_logging = "error" # info, error, debug
 $ffmpeg_timeout = 15 # timeout on job (minutes)
 $move_file = 1 # set to 0 for testing (check .\output directory) 
 $convert_1080p = 1 # 1 will convert higher resolution videos down to 1080p , 0 will not
-$min_video_size = 0.3 # min size in GB of video before it will quit
+$min_video_size = 0 # min size in GB of video before it will quit
 $GPU_threads = 1 # how many GPU jobs at same time 

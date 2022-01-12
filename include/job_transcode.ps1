@@ -18,7 +18,7 @@ $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 1)
 
 #Add to skip file so it is not processed again 
-# Write-Skip $video_name
+Write-Skip $video_name
 
 #Write-Host "Check if file is HEVC first..."
 $video_codec = Get-VideoCodec $video_path
@@ -34,6 +34,8 @@ $start_time = (GET-Date)
 
 # NVIDIA TUNING - disable NVDEC 
 #if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
+# AMD TUNING - disable b frames 
+if ($ffmpeg_codec -eq "hevc_amf"){$ffmpeg_codec_tune = "-bf 0"}
 
 if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
 if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
@@ -134,6 +136,6 @@ Else {
     }
     else { 
         Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" 
-        Write-Skip $video_name
+        # Write-Skip $video_name
     }                                
 }     
