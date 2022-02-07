@@ -17,9 +17,6 @@ $video_name = $video.name
 $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 1)
 
-#Add to skip file so it is not processed again 
-Write-Skip $video_name
-
 #Write-Host "Check if file is HEVC first..."
 $video_codec = Get-VideoCodec $video_path
 
@@ -40,7 +37,7 @@ if ($ffmpeg_codec -eq "hevc_amf"){$ffmpeg_codec_tune = "-usage transcoding -qual
 if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
 if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
 
-if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac" }
+if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac -b:a 192k" }
 if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
 
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
@@ -143,3 +140,6 @@ Else {
         # Write-Skip $video_name
     }                                
 }     
+
+#Add to skip file so it is not processed again 
+Write-Skip $video_name
