@@ -49,14 +49,23 @@ if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null }
 # Main FFMPEG Params 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"""
 
-#GPU Offload...
-if ($video_codec -ne "hevc") { 
+function encode_vid  {
+
     Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
-    If ($err -ne "") { 
-        Trace-Error "$job - $video_name $err" 
+
+    If ($err -ne "") { Trace-Error "$job - $video_name $err" }
+    while ($err -like "*No such file or directory*") { 
+        Trace-Message "Drive disconnect? - retry in 10 seconds"
+        Start-Sleep 10 
+        encode_vid
     }
+}
+
+#GPU Offload...
+if ($video_codec -ne "hevc") { 
+    encode_vid
 }
 
 $end_time = (GET-Date)
