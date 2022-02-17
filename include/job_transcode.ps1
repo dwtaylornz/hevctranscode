@@ -29,6 +29,9 @@ $video_duration_formated = Get-VideoDurationFormatted $video_duration
 
 $start_time = (GET-Date)
 
+#Add to skip file so it is not processed again 
+Write-Skip $video_name
+
 # NVIDIA TUNING -
 #if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
 # AMD TUNING - 
@@ -150,5 +153,3 @@ Else {
     }                                
 }     
 
-#Add to skip file so it is not processed again 
-Write-Skip $video_name
