@@ -58,12 +58,12 @@ function encode_vid  {
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
 
-    If ($err -ne "") { Trace-Error "$job - $video_name $err" }
-    while ($err -like "*No such file or directory*") { 
-        Trace-Message "Drive disconnect? - retry in 10 seconds"
-        Start-Sleep 10 
-        encode_vid
-    }
+    # If ($err -ne "") { Trace-Error "$job - $video_name $err" }
+    # while ($err -like "*No such file or directory*") { 
+    #     Trace-Message "Drive disconnect? - retry in 10 seconds"
+    #     Start-Sleep 10 
+    #     encode_vid
+    # }
 }
 
 #GPU Offload...
