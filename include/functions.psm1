@@ -7,21 +7,21 @@ function Trace-Message ([string] $message) {
     }
 }
 
-function Trace-Savings ([string] $message) {
-    $mtx2 = New-Object System.Threading.Mutex($false, "SavingsMutex")
-    If ($mtx2.WaitOne(1000)) {
-        Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_savings.log
-        [void]$mtx2.ReleaseMutex()
-    }
-}
+# function Trace-Savings ([string] $message) {
+#     $mtx2 = New-Object System.Threading.Mutex($false, "SavingsMutex")
+#     If ($mtx2.WaitOne(1000)) {
+#         Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_savings.log
+#         [void]$mtx2.ReleaseMutex()
+#     }
+# }
 
-function Trace-Error ([string] $message) {
-    $mtx3 = New-Object System.Threading.Mutex($false, "ErrorMutex")
-    If ($mtx3.WaitOne(1000)) {
-        Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_error.log
-        [void]$mtx3.ReleaseMutex()
-    }
-}
+# function Trace-Error ([string] $message) {
+#     $mtx3 = New-Object System.Threading.Mutex($false, "ErrorMutex")
+#     If ($mtx3.WaitOne(1000)) {
+#         Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_error.log
+#         [void]$mtx3.ReleaseMutex()
+#     }
+# }
 
 function Write-Skip ([string] $video_name) {
     $mtx4 = New-Object System.Threading.Mutex($false, "SkipMutex")

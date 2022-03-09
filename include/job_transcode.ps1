@@ -5,7 +5,7 @@ $job = $args[2]
 Import-Module ".\include\functions.psm1" -Force
 
 $RootDir = $PSScriptRoot
-if ($RootDir -eq ""){
+if ($RootDir -eq "") {
     $RootDir = $pwd
 }
 
@@ -29,18 +29,17 @@ $video_duration_formated = Get-VideoDurationFormatted $video_duration
 
 $start_time = (GET-Date)
 
-#Add to skip file so it is not processed again 
-Write-Skip $video_name
+
 
 # NVIDIA TUNING -
 #if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
 # AMD TUNING - 
-if ($ffmpeg_codec -eq "hevc_amf"){$ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr"}
+if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr" }
 
 if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
 if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
 
-if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac -b:a 192k" }
+if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac" }
 if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
 
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
@@ -52,24 +51,10 @@ if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null }
 # Main FFMPEG Params 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"""
 
-function encode_vid  {
-
-    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
-    Start-Sleep 1
-    Invoke-Expression $ffmpeg_params -ErrorVariable err 
-
-    # If ($err -ne "") { Trace-Error "$job - $video_name $err" }
-    # while ($err -like "*No such file or directory*") { 
-    #     Trace-Message "Drive disconnect? - retry in 10 seconds"
-    #     Start-Sleep 10 
-    #     encode_vid
-    # }
-}
-
 #GPU Offload...
-if ($video_codec -ne "hevc") { 
-    encode_vid
-}
+Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
+Start-Sleep 1
+Invoke-Expression $ffmpeg_params -ErrorVariable err 
 
 $end_time = (GET-Date)
 
@@ -104,21 +89,21 @@ if (test-path -PathType leaf output\$video_name) {
     if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
               
     # check the file is healthy
-    #confirm move file is enabled, and confirm file is 5% smaller or non-zero 
+    #confirm move file is enabled, and confirm file is 10% smaller or non-zero 
     #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
-    if ($move_file -eq 1 -AND $diff_percent -gt 5 -AND $diff_percent -lt 95 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
+    if ($move_file -eq 1 -AND $diff_percent -gt 10 -AND $diff_percent -lt 90 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
         Trace-Message "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         Start-delay
 
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
-            Trace-Savings "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
+            Trace-Message "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
             Write-SkipHEVC $video_name
         }
         catch {
             Trace-Message "Error moving $video_name back to source location - Check permissions"
-            Trace-Error $_.exception.message 
+            Trace-Message $_.exception.message 
         }
     }   
 
@@ -153,3 +138,5 @@ Else {
     }                                
 }     
 
+#Add to skip file so it is not processed again 
+Write-Skip $video_name
