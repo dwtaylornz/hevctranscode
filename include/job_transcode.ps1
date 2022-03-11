@@ -29,7 +29,9 @@ $video_duration_formated = Get-VideoDurationFormatted $video_duration
 
 $start_time = (GET-Date)
 
-
+# Add to skip file so it is not processed again
+# do at beginning so that stuff that times out does not get processed again. 
+Write-Skip $video_name
 
 # NVIDIA TUNING -
 #if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
@@ -81,7 +83,6 @@ if (test-path -PathType leaf output\$video_name) {
 
     #check video length (used for progress updates)
     $video_new_duration = $null 
-
     $video_new_duration = Get-VideoDuration output\$video_name
     $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
                  
@@ -98,7 +99,6 @@ if (test-path -PathType leaf output\$video_name) {
 
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
-            Trace-Message "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
             Write-SkipHEVC $video_name
         }
         catch {
@@ -138,5 +138,4 @@ Else {
     }                                
 }     
 
-#Add to skip file so it is not processed again 
-Write-Skip $video_name
+
