@@ -54,22 +54,23 @@ if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null }
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"""
 
 #GPU Offload...
-Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
-Start-Sleep 1
-Invoke-Expression $ffmpeg_params -ErrorVariable err 
+if ($video_codec -ne "hevc" ) {
+    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
+    Start-Sleep 1
+    Invoke-Expression $ffmpeg_params -ErrorVariable err 
+    $end_time = (GET-Date)
 
-$end_time = (GET-Date)
+    #calc time taken 
+    $time = $end_time - $start_time
+    $time_hours = $time.hours
+    $time_mins = $time.minutes
+    $time_secs = $time.seconds 
+    if ($time_secs -lt 10) { $time_secs = "0$time_secs" }
+    $total_time_formatted = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
+    if ($time_hours -eq 0) { $total_time_formatted = "$time_mins" + ":" + "$time_secs" }
 
-#calc time taken 
-$time = $end_time - $start_time
-$time_hours = $time.hours
-$time_mins = $time.minutes
-$time_secs = $time.seconds 
-if ($time_secs -lt 10) { $time_secs = "0$time_secs" }
-$total_time_formatted = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
-if ($time_hours -eq 0) { $total_time_formatted = "$time_mins" + ":" + "$time_secs" }
-
-# Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
+    # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
+}
 
 if (test-path -PathType leaf output\$video_name) {        
 
