@@ -58,6 +58,11 @@ if ($video_codec -ne "hevc" ) {
     Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
+
+    if ($err){
+        Write-Log "$job - $video_name $err"
+    }
+
     $end_time = (GET-Date)
 
     #calc time taken 
