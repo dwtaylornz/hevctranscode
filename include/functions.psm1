@@ -1,50 +1,25 @@
-function Trace-Message ([string] $message) {
-    Write-Output "$(Get-Date -Format G): $message"
-    $mtx = New-Object System.Threading.Mutex($false, "TranscodeMutex")
-    If ($mtx.WaitOne(1000)) {
-        Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_transcode.log
-        [void]$mtx.ReleaseMutex()
-    }
+
+function Write-Log  ([string]$LogString) {
+    $Logfile = ".\logs\hevc_transcode.log"
+    $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
+    $LogMessage = "$Stamp $LogString"
+    Write-Output $LogMessage
+    Add-content $LogFile -value $LogMessage
 }
 
-# function Trace-Savings ([string] $message) {
-#     $mtx2 = New-Object System.Threading.Mutex($false, "SavingsMutex")
-#     If ($mtx2.WaitOne(1000)) {
-#         Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_savings.log
-#         [void]$mtx2.ReleaseMutex()
-#     }
-# }
-
-# function Trace-Error ([string] $message) {
-#     $mtx3 = New-Object System.Threading.Mutex($false, "ErrorMutex")
-#     If ($mtx3.WaitOne(1000)) {
-#         Write-Output "$(Get-Date -Format G): $message" >> .\logs\hevc_error.log
-#         [void]$mtx3.ReleaseMutex()
-#     }
-# }
-
 function Write-Skip ([string] $video_name) {
-    $mtx4 = New-Object System.Threading.Mutex($false, "SkipMutex")
-    If ($mtx4.WaitOne(1000)) {
-        Write-Output "$video_name" >> .\skip.log
-        [void]$mtx4.ReleaseMutex()
-    }
+    $Logfile = ".\skip.log"
+    Add-content $LogFile -value $video_name
 }
 
 function Write-SkipError ([string] $video_name) {
-    $mtx5 = New-Object System.Threading.Mutex($false, "SkipErrorMutex")
-    If ($mtx5.WaitOne(1000)) {
-        Write-Output "$video_name" >> .\skiperror.log
-        [void]$mtx5.ReleaseMutex()
-    }
+    $Logfile = ".\skiperror.log"
+    Add-content $LogFile -value $video_name
 }
 
 function Write-SkipHEVC ([string] $video_name) {
-    $mtx6 = New-Object System.Threading.Mutex($false, "SkipHEVCMutex")
-    If ($mtx6.WaitOne(1000)) {
-        Write-Output "$video_name" >> .\skiphevc.log
-        [void]$mtx6.ReleaseMutex()
-    }
+    $Logfile = ".\skiphevc.log"
+    Add-content $LogFile -value $video_name
 }
 
 function Get-VideoCodec ([string] $video_path) {

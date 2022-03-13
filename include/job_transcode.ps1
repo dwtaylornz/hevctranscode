@@ -55,7 +55,7 @@ $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpe
 
 #GPU Offload...
 if ($video_codec -ne "hevc" ) {
-    Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
+    Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
     $end_time = (GET-Date)
@@ -69,7 +69,7 @@ if ($video_codec -ne "hevc" ) {
     $total_time_formatted = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
     if ($time_hours -eq 0) { $total_time_formatted = "$time_mins" + ":" + "$time_secs" }
 
-    # Trace-Message "$job Job - $video_name ($run_time_current/$scan_period)"         
+    # Write-Log "$job Job - $video_name ($run_time_current/$scan_period)"         
 }
 
 if (test-path -PathType leaf output\$video_name) {        
@@ -87,15 +87,15 @@ if (test-path -PathType leaf output\$video_name) {
     $video_new_duration = Get-VideoDuration output\$video_name
     $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
                  
-    # Trace-Message "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formatted)" 
-    if ($video_width -gt 1920) { Trace-Message "  New Transcoded Video Width: $video_width -> 1920" }
+    # Write-Log "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formatted)" 
+    if ($video_width -gt 1920) { Write-Log "  New Transcoded Video Width: $video_width -> 1920" }
               
     # check the file is healthy
     #confirm move file is enabled, and confirm file is 10% smaller or non-zero 
     #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
     if ($move_file -eq 1 -AND $diff_percent -gt 10 -AND $diff_percent -lt 90 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
-        Trace-Message "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
+        Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         Start-delay
 
         try {
@@ -103,24 +103,24 @@ if (test-path -PathType leaf output\$video_name) {
             Write-SkipHEVC $video_name
         }
         catch {
-            Trace-Message "Error moving $video_name back to source location - Check permissions"
-            Trace-Message $_.exception.message 
+            Write-Log "Error moving $video_name back to source location - Check permissions"
+            Write-Log $_.exception.message 
         }
     }   
 
     else {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
-            Trace-Message "$job - $video_name incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
+            Write-Log "$job - $video_name incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-            Trace-Message "$job - $video_name file size change not within limits, File - NOT copied" 
+            Write-Log "$job - $video_name file size change not within limits, File - NOT copied" 
         }
         elseif ($move_file -eq 0) { 
-            Trace-Message "$job - $video_name move file disabled, File - NOT copied" 
+            Write-Log "$job - $video_name move file disabled, File - NOT copied" 
         }
         else { 
-            Trace-Message "$job - $video_name File - NOT copied" 
+            Write-Log "$job - $video_name File - NOT copied" 
         }
         Write-SkipError $video_name
         Start-sleep 2
@@ -130,11 +130,11 @@ if (test-path -PathType leaf output\$video_name) {
 
 Else {   
     if ($video_codec -eq "hevc") {
-        Trace-Message  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already HEVC, Skipping" 
+        Write-Log  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already HEVC, Skipping" 
         Write-SkipHEVC $video_name
     }
     else { 
-        Trace-Message "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" 
+        Write-Log "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" 
         # Write-Skip $video_name
     }                                
 }     
