@@ -1,6 +1,6 @@
 
 function Write-Log  ([string]$LogString) {
-    $Logfile = ".\logs\hevc_transcode.log"
+    $Logfile = ".\hevc_transcode.log"
     $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
     $LogMessage = "$Stamp $LogString"
     Write-Output $LogMessage
@@ -8,18 +8,24 @@ function Write-Log  ([string]$LogString) {
 }
 
 function Write-Skip ([string] $video_name) {
-    $Logfile = ".\skip.log"
-    Add-content $LogFile -value $video_name
+    if ($video_name) { 
+        $Logfile = ".\skip.log"
+        Add-content $LogFile -value $video_name
+    }
 }
 
 function Write-SkipError ([string] $video_name) {
-    $Logfile = ".\skiperror.log"
-    Add-content $LogFile -value $video_name
+    if ($video_name) { 
+        $Logfile = ".\skiperror.log"
+        Add-content $LogFile -value $video_name
+    }
 }
 
 function Write-SkipHEVC ([string] $video_name) {
-    $Logfile = ".\skiphevc.log"
-    Add-content $LogFile -value $video_name
+    if ($video_name) { 
+        $Logfile = ".\skiphevc.log"
+        Add-content $LogFile -value $video_name
+    }
 }
 
 function Get-VideoCodec ([string] $video_path) {
