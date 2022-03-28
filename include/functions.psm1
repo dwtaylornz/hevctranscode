@@ -107,10 +107,8 @@ function Show-State () {
 }
 
 function Initialize-Folders() {
-    # Setup temp output folder, and clear previous transcodes
+    # Setup required folders
     if (!(test-path -PathType container output)) { new-item -itemtype directory -force -path output | Out-Null }
-    if (!(test-path -PathType container logs)) { new-item -itemtype directory -force -path logs | Out-Null }    
-
 }
 
 function Get-Videos() {
