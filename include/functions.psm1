@@ -1,30 +1,32 @@
 
-function Write-Log  ([string]$LogString) {
-    $Logfile = ".\hevc_transcode.log"
-    $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
-    $LogMessage = "$Stamp $LogString"
-    Write-Output $LogMessage
-    Add-content $LogFile -value $LogMessage
+function Write-Log  ([string] $LogString) {
+    if ($LogString) {
+        $Logfile = ".\hevc_transcode.log"
+        $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
+        $LogMessage = "$Stamp $LogString"
+        Write-Output $LogMessage
+        Add-content $LogFile -value $LogMessage -Encoding utf8
+    }
 }
 
 function Write-Skip ([string] $video_name) {
     if ($video_name) { 
         $Logfile = ".\skip.log"
-        Add-content $LogFile -value $video_name
+        Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
 
 function Write-SkipError ([string] $video_name) {
     if ($video_name) { 
         $Logfile = ".\skiperror.log"
-        Add-content $LogFile -value $video_name
+        Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
 
 function Write-SkipHEVC ([string] $video_name) {
     if ($video_name) { 
         $Logfile = ".\skiphevc.log"
-        Add-content $LogFile -value $video_name
+        Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
 
@@ -151,7 +153,7 @@ function Get-Skip() {
 
     Write-Host -NoNewLine "Getting previously processed files: " 
     if ((test-path -PathType leaf skip.log)) { 
-        $skipped_files = @(Get-Content -Path skip.log)
+        $skipped_files = @(Get-Content -Path skip.log -Encoding utf8)
         $skip_count = $skipped_files.Count
     }
     else { $skip_count = 0 }
@@ -163,7 +165,7 @@ function Get-SkipError() {
 
     Write-Host -NoNewLine "Getting previously skipped (error) files: " 
     if ((test-path -PathType leaf skiperror.log)) { 
-        $skippederror_files = @(Get-Content -Path skiperror.log)
+        $skippederror_files = @(Get-Content -Path skiperror.log -Encoding utf8)
         $skiperror_count = $skippederror_files.Count
     }
     else { $skiperror_count = 0 }
@@ -175,7 +177,7 @@ function Get-SkipHEVC() {
 
     Write-Host -NoNewLine "Getting previously skipped (HEVC) files: " 
     if ((test-path -PathType leaf skiphevc.log)) { 
-        $skippedhevc_files = @(Get-Content -Path skiphevc.log)
+        $skippedhevc_files = @(Get-Content -Path skiphevc.log -Encoding utf8)
         $skiphevc_count = $skippedhevc_files.Count
     }
     else { $skiphevc_count = 0 }
