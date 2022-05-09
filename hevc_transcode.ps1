@@ -102,5 +102,6 @@ while (get-job -State Running -ea silentlycontinue) {
     Receive-Job *
 }   
 Write-Log "exiting"
-Read-Host -Prompt "Press any key to continue"
+Start-Sleep 10
+#Read-Host -Prompt "Press any key to continue"
 exit
