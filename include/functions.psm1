@@ -11,21 +11,21 @@ function Write-Log  ([string] $LogString) {
 
 function Write-Skip ([string] $video_name) {
     if ($video_name) { 
-        $Logfile = ".\skip.log"
+        $Logfile = ".\skip.txt"
         Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
 
 function Write-SkipError ([string] $video_name) {
     if ($video_name) { 
-        $Logfile = ".\skiperror.log"
+        $Logfile = ".\skiperror.txt"
         Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
 
 function Write-SkipHEVC ([string] $video_name) {
     if ($video_name) { 
-        $Logfile = ".\skiphevc.log"
+        $Logfile = ".\skiphevc.txt"
         Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
@@ -152,8 +152,8 @@ function Invoke-HealthCheck() {
 function Get-Skip() {
 
     Write-Host -NoNewLine "Getting previously processed files: " 
-    if ((test-path -PathType leaf skip.log)) { 
-        $skipped_files = @(Get-Content -Path skip.log -Encoding utf8)
+    if ((test-path -PathType leaf skip.txt)) { 
+        $skipped_files = @(Get-Content -Path skip.txt -Encoding utf8)
         $skip_count = $skipped_files.Count
     }
     else { $skip_count = 0 }
@@ -164,8 +164,8 @@ function Get-Skip() {
 function Get-SkipError() {
 
     Write-Host -NoNewLine "Getting previously skipped (error) files: " 
-    if ((test-path -PathType leaf skiperror.log)) { 
-        $skippederror_files = @(Get-Content -Path skiperror.log -Encoding utf8)
+    if ((test-path -PathType leaf skiperror.txt)) { 
+        $skippederror_files = @(Get-Content -Path skiperror.txt -Encoding utf8)
         $skiperror_count = $skippederror_files.Count
     }
     else { $skiperror_count = 0 }
@@ -176,8 +176,8 @@ function Get-SkipError() {
 function Get-SkipHEVC() {
 
     Write-Host -NoNewLine "Getting previously skipped (HEVC) files: " 
-    if ((test-path -PathType leaf skiphevc.log)) { 
-        $skippedhevc_files = @(Get-Content -Path skiphevc.log -Encoding utf8)
+    if ((test-path -PathType leaf skiphevc.txt)) { 
+        $skippedhevc_files = @(Get-Content -Path skiphevc.txt -Encoding utf8)
         $skiphevc_count = $skippedhevc_files.Count
     }
     else { $skiphevc_count = 0 }

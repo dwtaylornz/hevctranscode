@@ -9,4 +9,5 @@ ffprobe.exe
 *.log
 *.avi
 *.mkv
+*.txt
 .vscode
