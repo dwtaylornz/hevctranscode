@@ -128,7 +128,7 @@ if (test-path -PathType leaf output\$video_name) {
             Write-Log "$job - $video_name File - NOT copied" 
         }
         Write-SkipError $video_name
-        Start-sleep 2
+        Start-sleep 1
         Remove-Item output\$video_name
     }            
 }

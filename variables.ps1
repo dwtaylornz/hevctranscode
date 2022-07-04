@@ -1,5 +1,4 @@
 # Variables - Update before run
-
 # Paths 
 $media_path = "Z:\videos\" # path in SMB share (must include trailing backslash) 
 
