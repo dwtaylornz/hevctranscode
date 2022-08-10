@@ -7,4 +7,5 @@ ffplay.exe
 ffprobe.exe
 *.csv
 *.log
+*.txt
 .vscode

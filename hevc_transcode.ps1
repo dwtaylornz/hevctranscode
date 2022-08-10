@@ -73,10 +73,8 @@ Foreach ($video in $videos) {
                 }   
 
                 # has thread run too long? 
-                #  $timeout = [$ffmpeg_timeout]::FromMinutes(1)
                 $now = Get-Date
-                Get-Job -name GPU-* | Where {$_.State -eq 'Running' -and 
-                                (($now - $_.PSBeginTime).TotalMinutes -gt $ffmpeg_timeout)} | Stop-Job
+                Get-Job -name GPU-* | Where { $_.State -eq 'Running' -and (($now - $_.PSBeginTime).TotalMinutes -gt $ffmpeg_timeout) } | Stop-Job
 
                 # If thread not running then i can run it here 
                 if ($gpu_state -ne "Running") {
