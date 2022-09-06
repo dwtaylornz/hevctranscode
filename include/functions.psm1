@@ -12,7 +12,7 @@ function Write-Log  ([string] $LogString) {
 function Write-Skip ([string] $video_name) {
     if ($video_name) { 
         $Logfile = "skip.txt"
-        start-sleep -Seconds (0..5 | get-random)
+        # start-sleep -Seconds (0..5 | get-random)
         Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
