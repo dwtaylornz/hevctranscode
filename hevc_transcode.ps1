@@ -34,7 +34,7 @@ $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
 # Show total videos to process (scanned files - skip count) 
 # Get-VideosToProcess($file_count, $skip_count)
 Write-Host ""
-$video_count = ($file_count - $skip_count)
+$video_count = ($file_count - ($skip_count + $skiperror_count + $skiphevc_count))
 Write-Host "Total videos to process: $video_count"
 
 #Show settings and any jobs running 

@@ -12,6 +12,7 @@ function Write-Log  ([string] $LogString) {
 function Write-Skip ([string] $video_name) {
     if ($video_name) { 
         $Logfile = "skip.txt"
+        start-sleep -Seconds (0..5 | get-random)
         Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
@@ -25,7 +26,7 @@ function Write-SkipError ([string] $video_name) {
 
 function Write-SkipHEVC ([string] $video_name) {
     if ($video_name) { 
-        $Logfile = ".skiphevc.txt"
+        $Logfile = "skiphevc.txt"
         Add-content $LogFile -value $video_name -Encoding utf8
     }
 }
@@ -201,7 +202,6 @@ function Test-VideoPath($path) {
         write-host "Cannot get to path?..."
         $check = test-path "$path"
     }
-
 
 }
 
