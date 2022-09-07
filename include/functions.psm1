@@ -5,7 +5,16 @@ function Write-Log  ([string] $LogString) {
         $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
         $LogMessage = "$Stamp $LogString"
         Write-Output $LogMessage
-        Add-content $LogFile -value $LogMessage -Encoding utf8
+
+        $mutexName = 'Write-Log'
+        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
+        $check = $mutex.WaitOne() 
+        try {
+            Add-content $LogFile -value $LogMessage -Encoding utf8
+        }
+        finally {
+            $mutex.ReleaseMutex()
+        }       
     }
 }
 
@@ -13,21 +22,48 @@ function Write-Skip ([string] $video_name) {
     if ($video_name) { 
         $Logfile = "skip.txt"
         # start-sleep -Seconds (0..5 | get-random)
-        Add-content $LogFile -value $video_name -Encoding utf8
+
+        $mutexName = 'Write-Skip'
+        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
+        $check = $mutex.WaitOne() 
+        try {
+            Add-content $LogFile -value $video_name -Encoding utf8
+        }
+        finally {
+            $mutex.ReleaseMutex()
+        }      
     }
 }
 
 function Write-SkipError ([string] $video_name) {
     if ($video_name) { 
         $Logfile = "skiperror.txt"
-        Add-content $LogFile -value $video_name -Encoding utf8
+
+        $mutexName = 'Write-SkipError'
+        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
+        $check = $mutex.WaitOne() 
+        try {
+            Add-content $LogFile -value $video_name -Encoding utf8
+        }
+        finally {
+            $mutex.ReleaseMutex()
+        }      
     }
 }
 
 function Write-SkipHEVC ([string] $video_name) {
     if ($video_name) { 
         $Logfile = "skiphevc.txt"
-        Add-content $LogFile -value $video_name -Encoding utf8
+
+        $mutexName = 'Write-SkipHEVC'
+        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
+        $check = $mutex.WaitOne() 
+        try {
+            Add-content $LogFile -value $video_name -Encoding utf8
+        }
+        finally {
+            $mutex.ReleaseMutex()
+        }    
     }
 }
 
