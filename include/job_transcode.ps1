@@ -12,18 +12,18 @@ if ($RootDir -eq "") {
 # Get-Variables
 . (Join-Path $RootDir variables.ps1)
 
-#write-host "start-transcode" 
+# write-host "start-transcode" 
 $video_name = $video.name
 $video_path = $video.Fullname
 $video_size = [math]::Round($video.length / 1GB, 1)
 
-#Write-Host "Check if file is HEVC first..."
+# Write-Host "Check if file is HEVC first..."
 $video_codec = Get-VideoCodec $video_path
 
-#check video width (1920 width is more consistant for 1080p videos)
+# check video width (1920 width is more consistant for 1080p videos)
 $video_width = Get-VideoWidth $video_path
 
-#check video duration 
+# check video duration 
 $video_duration = Get-VideoDuration $video_path
 $video_duration_formated = Get-VideoDurationFormatted $video_duration 
 
@@ -34,7 +34,7 @@ $start_time = (GET-Date)
 Write-Skip $video_name
 
 # NVIDIA TUNING -
-#if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
+# if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
 # AMD TUNING - 
 if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr" }
 
@@ -47,25 +47,25 @@ if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
 if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null } 
 
-#check path 
+# check path 
 # Test-VideoPath "$video_path"
 
 # Main FFMPEG Params 
 $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map 0 -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"""
 
-#GPU Offload...
+# GPU Offload...
 if ($video_codec -ne "hevc" ) {
     Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
 
-    if ($err){
+    if ($err) {
         Write-Log "$job - $video_name $err"
     }
 
     $end_time = (GET-Date)
 
-    #calc time taken 
+    # calc time taken 
     $time = $end_time - $start_time
     $time_hours = $time.hours
     $time_mins = $time.minutes
@@ -79,7 +79,7 @@ if ($video_codec -ne "hevc" ) {
 
 if (test-path -PathType leaf output\$video_name) {        
 
-    #check size of new file 
+    # check size of new file 
     $video_new = Get-ChildItem output\$video_name | Select-Object Fullname, extension, length
     $video_new_size = [math]::Round($video_new.length / 1GB, 1)
     $diff = $video_size - $video_new_size
@@ -87,7 +87,7 @@ if (test-path -PathType leaf output\$video_name) {
     
     $diff_percent = [math]::Round((1 - ($video_new_size / $video_size)) * 100, 0)
 
-    #check video length (used for progress updates)
+    # check video length (used for progress updates)
     $video_new_duration = $null 
     $video_new_duration = Get-VideoDuration output\$video_name
     $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
@@ -96,8 +96,8 @@ if (test-path -PathType leaf output\$video_name) {
     if ($video_width -gt 1920) { Write-Log "  New Transcoded Video Width: $video_width -> 1920" }
               
     # check the file is healthy
-    #confirm move file is enabled, and confirm file is 10% smaller or non-zero 
-    #Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
+    # confirm move file is enabled, and confirm file is 10% smaller or non-zero 
+    # Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
     if ($move_file -eq 1 -AND $diff_percent -gt 10 -AND $diff_percent -lt 90 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
         Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
@@ -143,5 +143,3 @@ Else {
         # Write-Skip $video_name
     }                                
 }     
-
-
