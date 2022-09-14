@@ -101,6 +101,9 @@ if (test-path -PathType leaf output\$video_name) {
     if ($move_file -eq 1 -AND $diff_percent -gt 10 -AND $diff_percent -lt 90 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
 
         Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
+        if ($influx_address -AND $influx_db) {
+            Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null 
+        } 
         Start-delay
 
         try {

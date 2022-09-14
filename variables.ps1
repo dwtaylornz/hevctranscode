@@ -10,9 +10,13 @@ $run_health_check = 0 # also run quick health check of videos
 $ffmpeg_codec = "hevc_amf" # set to hevc_amf for AMD, hevc_nvenc for Nvidia, libx265 for CPU
 $ffmpeg_hwdec = 0 # set to 1 if you want to decode via HW also 
 $ffmpeg_logging = "error" # info, error, debug
-$ffmpeg_timeout = 15 # timeout on job (minutes)
+$ffmpeg_timeout = 60 # timeout on job (minutes)
 $ffmpeg_aac = 0 # set to 1 if you want to transcode audio to AAC
 $move_file = 1 # set to 0 for testing (check .\output directory) 
 $convert_1080p = 1 # 1 will convert higher resolution videos down to 1080p , 0 will not
 $min_video_size = 1 # min size in GB of video before it will quit
 $GPU_threads = 2 # how many GPU jobs at same time 
+
+# Write to influx
+$influx_address = "http://192.168.9.10:9086"
+$influx_db = "hevc"
