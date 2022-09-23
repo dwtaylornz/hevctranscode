@@ -33,7 +33,7 @@ $start_time = (GET-Date)
 # do at beginning so that stuff that times out does not get processed again. 
 Write-Skip $video_name
 
-# NVIDIA TUNING -
+# NVIDIA TUNING 
 # if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
 # AMD TUNING - 
 if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr" }
@@ -41,7 +41,16 @@ if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -qu
 if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
 if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
 
-if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac" }
+$transcode_msg = "transcoding to HEVC..."
+if ($ffmpeg_aac -eq 2) {
+    $ffmpeg_aac_cmd = "libfdk_aac -ac 2"
+    $transcode_msg = "transcoding to HEVC + libfdk AAC (2 channel)..."
+}
+if ($ffmpeg_aac -eq 1) {
+    $ffmpeg_aac_cmd = "aac -ac 2" 
+    $transcode_msg = "transcoding to HEVC + AAC (2 channel)..."
+}
+
 if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
 
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
@@ -55,7 +64,12 @@ $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpe
 
 # GPU Offload...
 if ($video_codec -ne "hevc" ) {
-    Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) transcoding..."            
+
+ 
+    if ($ffmpeg_aac -eq 2) { $ffmpeg_aac_cmd = "libfdk_aac -ac 2" }
+    if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac -ac 2" }
+
+    Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"            
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
 
@@ -120,19 +134,26 @@ if (test-path -PathType leaf output\$video_name) {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
             Write-Log "$job - $video_name incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
+            Start-sleep 1
+            Remove-Item output\$video_name
+            Write-SkipError $video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
             Write-Log "$job - $video_name file size change not within limits, File - NOT copied" 
+            Start-sleep 1
+            Remove-Item output\$video_name
+            Write-SkipError $video_name
         }
         elseif ($move_file -eq 0) { 
             Write-Log "$job - $video_name move file disabled, File - NOT copied" 
         }
         else { 
             Write-Log "$job - $video_name File - NOT copied" 
+            Start-sleep 1
+            Remove-Item output\$video_name
+            Write-SkipError $video_name
         }
-        Write-SkipError $video_name
-        Start-sleep 1
-        Remove-Item output\$video_name
+        
     }            
 }
 
@@ -143,6 +164,6 @@ Else {
     }
     else { 
         Write-Log "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" 
-        # Write-Skip $video_name
+        Write-SkipError $video_name
     }                                
 }     

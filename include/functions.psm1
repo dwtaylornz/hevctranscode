@@ -113,15 +113,12 @@ function Get-JobStatus ([string] $job) {
 }
 
 function Start-Delay {
-
     Write-Host -NoNewline "  Waiting 5 seconds before file move "
     Write-Host "(do not break or close window)" -ForegroundColor Yellow     
     Start-Sleep 5
-
 }
 
 function Show-State () {
-
     . .\variables.ps1
     Write-Host ""
     Write-Host -NoNewLine "Settings - " 
