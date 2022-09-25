@@ -97,9 +97,10 @@ function Get-VideoDuration ([string] $video_path) {
     return $video_duration
 }
 
+# not getting remainding seconds (as sometimes movie is shortened by a couple)
 function Get-VideoDurationFormatted ([string] $video_duration) {
     $video_duration_formated = [timespan]::fromseconds($video_duration)
-    $video_duration_formated = ("{0:hh\:mm\:ss}" -f $video_duration_formated)    
+    $video_duration_formated = ("{0:hh\:mm}" -f $video_duration_formated)    
     return $video_duration_formated
 }
 
