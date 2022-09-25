@@ -142,7 +142,7 @@ if (test-path -PathType leaf output\$video_name) {
             Write-SkipError $video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-            Write-Log "$job - $video_name file size change not within limits, File - NOT copied" 
+            Write-Log "$job - $video_name file size change not within limits ($video_size -> $video_new_size, $diff_percent), File - NOT copied" 
             Start-sleep 1
             Remove-Item output\$video_name
             Write-SkipError $video_name
