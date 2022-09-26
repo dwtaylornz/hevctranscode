@@ -4,7 +4,11 @@ function Write-Log  ([string] $LogString) {
         $Logfile = ".\hevc_transcode.log"
         $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
         $LogMessage = "$Stamp $LogString"
-        Write-Output $LogMessage
+
+        if ($LogString -like '*transcoding*') {Write-Host "$LogMessage" -ForegroundColor Cyan }
+        elseif ($LogString -like '*ERROR*') {Write-Host "$LogMessage" -ForegroundColor Red }
+        elseif ($LogString -like '*Saved*') {Write-Host "$LogMessage" -ForegroundColor Green }
+        else {Write-Host "$LogMessage"}
 
         $mutexName = 'Write-Log'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName

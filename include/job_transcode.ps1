@@ -53,8 +53,8 @@ if ($ffmpeg_aac -eq 1) {
 
 if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
 
-if ($ffmpeg_eng -eq 1) {$ffmpeg_eng_cmd = "0:m:language:eng"}
-if ($ffmpeg_eng -eq 0) {$ffmpeg_eng_cmd = "0"}
+if ($ffmpeg_eng -eq 1) { $ffmpeg_eng_cmd = "0:m:language:eng" }
+if ($ffmpeg_eng -eq 0) { $ffmpeg_eng_cmd = "0" }
 
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
 if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null } 
@@ -72,7 +72,7 @@ if ($video_codec -ne "hevc" ) {
     if ($ffmpeg_aac -eq 2) { $ffmpeg_aac_cmd = "libfdk_aac -ac 2" }
     if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac -ac 2" }
 
-    Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"            
+    Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"      
     Start-Sleep 1
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
 
@@ -128,7 +128,7 @@ if (test-path -PathType leaf output\$video_name) {
             Write-SkipHEVC $video_name
         }
         catch {
-            Write-Log "Error moving $video_name back to source location - Check permissions"
+            Write-Log "Error moving $video_name back to source location - Check permissions"   
             Write-Log $_.exception.message 
         }
     }   
@@ -136,13 +136,13 @@ if (test-path -PathType leaf output\$video_name) {
     else {
         
         if ($video_duration_formated -ne $video_new_duration_formated) { 
-            Write-Log "$job - $video_name incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
+            Write-Log "$job - $video_name ERROR, incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
             Start-sleep 1
             Remove-Item output\$video_name
             Write-SkipError $video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-            Write-Log "$job - $video_name file size change not within limits ($video_size -> $video_new_size, $diff_percent), File - NOT copied" 
+            Write-Log "$job - $video_name ERROR, file size change not within limits ($video_size -> $video_new_size, $diff_percent), File - NOT copied"   
             Start-sleep 1
             Remove-Item output\$video_name
             Write-SkipError $video_name
@@ -151,7 +151,7 @@ if (test-path -PathType leaf output\$video_name) {
             Write-Log "$job - $video_name move file disabled, File - NOT copied" 
         }
         else { 
-            Write-Log "$job - $video_name File - NOT copied" 
+            Write-Log "$job - $video_name ERROR, File - NOT copied"
             Start-sleep 1
             Remove-Item output\$video_name
             Write-SkipError $video_name
@@ -162,11 +162,11 @@ if (test-path -PathType leaf output\$video_name) {
 
 Else {   
     if ($video_codec -eq "hevc") {
-        Write-Log  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already HEVC, Skipping" 
+        Write-Log  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already HEVC, Skipping"
         Write-SkipHEVC $video_name
     }
     else { 
-        Write-Log "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED" 
+        Write-Log "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED"
         Write-SkipError $video_name
     }                                
 }     
