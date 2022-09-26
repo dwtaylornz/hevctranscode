@@ -41,19 +41,20 @@ if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -qu
 if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
 if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
 
-$transcode_msg = "transcoding to HEVC..."
+$transcode_msg = "transcoding to HEVC"
 if ($ffmpeg_aac -eq 2) {
     $ffmpeg_aac_cmd = "libfdk_aac -ac 2"
-    $transcode_msg = "transcoding to HEVC + libfdk AAC (2 channel)..."
+    $transcode_msg = "$transcode_msg + libfdk AAC (2 channel)"
 }
 if ($ffmpeg_aac -eq 1) {
     $ffmpeg_aac_cmd = "aac -ac 2" 
-    $transcode_msg = "transcoding to HEVC + AAC (2 channel)..."
+    $transcode_msg = "$transcode_msg + AAC (2 channel)"
 }
 
 if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
 
-if ($ffmpeg_eng -eq 1) { $ffmpeg_eng_cmd = "0:m:language:eng" }
+if ($ffmpeg_eng -eq 1) { $ffmpeg_eng_cmd = "0:m:language:eng?" 
+                    $transcode_msg = "$transcode_msg, english only"}
 if ($ffmpeg_eng -eq 0) { $ffmpeg_eng_cmd = "0" }
 
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
@@ -71,6 +72,8 @@ if ($video_codec -ne "hevc" ) {
  
     if ($ffmpeg_aac -eq 2) { $ffmpeg_aac_cmd = "libfdk_aac -ac 2" }
     if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac -ac 2" }
+
+    $transcode_msg = "$transcode_msg..."
 
     Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"      
     Start-Sleep 1
@@ -142,9 +145,9 @@ if (test-path -PathType leaf output\$video_name) {
             Write-SkipError $video_name
         }
         elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-            Write-Log "$job - $video_name ERROR, file size change not within limits ($video_size -> $video_new_size, $diff_percent), File - NOT copied"   
+            Write-Log "$job - $video_name ERROR, file size change not within limits ($video_size -> $video_new_size, $diff_percent%), File - NOT copied"   
             Start-sleep 1
-            Remove-Item output\$video_name
+            # Remove-Item output\$video_name
             Write-SkipError $video_name
         }
         elseif ($move_file -eq 0) { 
