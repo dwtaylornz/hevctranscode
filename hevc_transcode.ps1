@@ -3,6 +3,7 @@
 #
 # script will loop through largest to smallest videos transcoding to HEVC
 # populate variables.ps1 before running this script. 
+# TODO - ffprobe to confirm that audio & video track still exist (rather than size check). ffprobe - length check, and video / audio check should be sufficient to check if healthy. 
 
 Set-Location $PSScriptRoot
 $RootDir = $PSScriptRoot

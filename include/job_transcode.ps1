@@ -53,8 +53,10 @@ if ($ffmpeg_aac -eq 1) {
 
 if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
 
-if ($ffmpeg_eng -eq 1) { $ffmpeg_eng_cmd = "0:m:language:eng?" 
-                    $transcode_msg = "$transcode_msg, english only"}
+if ($ffmpeg_eng -eq 1) {
+    $ffmpeg_eng_cmd = "0:m:language:eng?" 
+    $transcode_msg = "$transcode_msg, english only"
+}
 if ($ffmpeg_eng -eq 0) { $ffmpeg_eng_cmd = "0" }
 
 if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
