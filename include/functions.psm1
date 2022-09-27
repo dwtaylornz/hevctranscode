@@ -73,16 +73,22 @@ function Write-SkipHEVC ([string] $video_name) {
 
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
-    $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
-    if (Select-String -pattern "hevc" -InputObject $video_codec -quiet) { $video_codec = "hevc" }
-    if (Select-String -pattern "h264" -InputObject $video_codec -quiet) { $video_codec = "h264" } 
-    if (Select-String -pattern "vc1" -InputObject $video_codec -quiet) { $video_codec = "vc1" }          
-    if (Select-String -pattern "mpeg2video" -InputObject $video_codec -quiet) { $video_codec = "mpeg2video" }
-    if (Select-String -pattern "mpeg4" -InputObject $video_codec -quiet) { $video_codec = "mpeg4" }
-    if (Select-String -pattern "rawvideo" -InputObject $video_codec -quiet) { $video_codec = "rawvideo" }
-    if (Select-String -pattern "vp9" -InputObject $video_codec -quiet) { $video_codec = "vp9" }
+    $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`")
+    # if (Select-String -pattern "hevc" -InputObject $video_codec -quiet) { $video_codec = "hevc" }
+    # if (Select-String -pattern "h264" -InputObject $video_codec -quiet) { $video_codec = "h264" } 
+    # if (Select-String -pattern "vc1" -InputObject $video_codec -quiet) { $video_codec = "vc1" }          
+    # if (Select-String -pattern "mpeg2video" -InputObject $video_codec -quiet) { $video_codec = "mpeg2video" }
+    # if (Select-String -pattern "mpeg4" -InputObject $video_codec -quiet) { $video_codec = "mpeg4" }
+    # if (Select-String -pattern "rawvideo" -InputObject $video_codec -quiet) { $video_codec = "rawvideo" }
+    # if (Select-String -pattern "vp9" -InputObject $video_codec -quiet) { $video_codec = "vp9" }
     return $video_codec
 }
+
+function Get-AudioCodec ([string] $video_path) {
+    $audio_codec = .\ffprobe.exe -v error -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
+    return $audio_codec
+}
+
 
 function Get-VideoWidth ([string] $video_path) {
     #check video width (1920 width is more consistant for 1080p videos)
