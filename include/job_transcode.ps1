@@ -122,10 +122,7 @@ if (test-path -PathType leaf output\$video_name) {
     # Write-Log "$job Job - $video_name Transcode time: $start_time -> $end_time (duration: $total_time_formatted)" 
     if ($video_width -gt 1920) { Write-Log "  New Transcoded Video Width: $video_width -> 1920" }
               
-    # check the file is healthy
-    # confirm move file is enabled, and confirm file is 10% smaller or non-zero 
-    # Write-Host "  DEBUG: old : $video_duration_formated new : $video_new_duration_formated"
-    # if ($move_file -eq 1 -AND $diff_percent -gt 10 -AND $diff_percent -lt 90 -AND $video_new_size -ne 0 -AND $diff -gt 0 -AND $video_duration_formated -eq $video_new_duration_formated) {    
+    # confirm move file is enabled, has audio and video stream.
     if ($move_file -eq 1 -AND $video_duration_formated -eq $video_new_duration_formated -AND $null -ne $video_new_videocodec -AND $null -ne $video_new_audiocodec) {    
 
         Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
@@ -154,29 +151,25 @@ if (test-path -PathType leaf output\$video_name) {
         }
 
         elseif ($null -eq $video_new_videocodec) { 
-            Write-Log "$job - $video_name ERROR, no video detected, File - NOT copied" 
+            Write-Log "$job - $video_name ERROR, no video stream detected, File - NOT copied" 
             Start-sleep 1
+            Remove-Item output\$video_name
             Write-SkipError $video_name
         }
         elseif ($null -eq $video_new_audiocodec) { 
-            Write-Log "$job - $video_name ERROR, no audio detected, File - NOT copied" 
+            Write-Log "$job - $video_name ERROR, no audio stream detected, File - NOT copied" 
             Start-sleep 1
+            Remove-Item output\$video_name
             Write-SkipError $video_name
         }
 
         elseif ($move_file -eq 0) { 
             Write-Log "$job - $video_name move file disabled, File - NOT copied" 
         }
-        elseif ($diff_percent -gt 95 -OR $diff_percent -lt 5 -OR $video_new_size -eq 0) { 
-            Write-Log "$job - $video_name ERROR, file size change not within limits ($video_size -> $video_new_size, $diff_percent%), File - NOT copied"   
-            Start-sleep 1
-            # Remove-Item output\$video_name
-            Write-SkipError $video_name
-        }
         else { 
             Write-Log "$job - $video_name ERROR, File - NOT copied"
             Start-sleep 1
-            Remove-Item output\$video_name
+            # Remove-Item output\$video_name
             Write-SkipError $video_name
         }
         

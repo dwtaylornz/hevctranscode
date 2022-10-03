@@ -86,10 +86,12 @@ Foreach ($video in $videos) {
                     break
                 }       
 
-                # Output existing jobs 
-                if ($gpu_state -eq "Running" ) { 
-                    Receive-Job -name "GPU-$thread" 
-                }  
+                # # Output existing jobs 
+                # if ($gpu_state -eq "Running" ) { 
+                #     Receive-Job -name "GPU-$thread" 
+                # }  
+
+                Receive-Job -name *
             }          
             if ($done -eq 1) { break }
         }

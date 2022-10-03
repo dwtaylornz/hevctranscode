@@ -1,7 +1,8 @@
 output
 compare
 backup
-test
+test*
+ffmpeg
 ffmpeg.exe
 ffplay.exe
 ffprobe.exe
@@ -9,3 +10,6 @@ ffprobe.exe
 *.log
 *.txt
 .vscode
+*.exe
+av1an.exe
+rav1e.exe
