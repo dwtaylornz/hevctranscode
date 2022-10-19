@@ -33,56 +33,51 @@ $start_time = (GET-Date)
 # do at beginning so that stuff that times out does not get processed again. 
 Write-Skip $video_name
 
-# NVIDIA TUNING 
-# if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
-# AMD TUNING - 
-if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr" }
-
-if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
-if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
-
-$transcode_msg = "transcoding to HEVC"
-if ($ffmpeg_aac -eq 2) {
-    $ffmpeg_aac_cmd = "libfdk_aac -ac 2"
-    $transcode_msg = "$transcode_msg + libfdk AAC (2 channel)"
-}
-if ($ffmpeg_aac -eq 1) {
-    $ffmpeg_aac_cmd = "aac -ac 2" 
-    $transcode_msg = "$transcode_msg + AAC (2 channel)"
-}
-
-if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
-
-if ($ffmpeg_eng -eq 1) {
-    $ffmpeg_eng_cmd = "0:m:language:eng?" 
-    $transcode_msg = "$transcode_msg, english only"
-}
-if ($ffmpeg_eng -eq 0) { $ffmpeg_eng_cmd = "0" }
-
-if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
-if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null } 
-
-# check path 
-# Test-VideoPath "$video_path"
-
-# Main FFMPEG Params 
-$ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"""
-
 # GPU Offload...
 if ($video_codec -ne "hevc" ) {
 
- 
+    # NVIDIA TUNING 
+    # if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
+    # AMD TUNING - 
+    if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr" }
+
+    if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
+    if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
+
+    $transcode_msg = "transcoding to HEVC"
+    if ($ffmpeg_aac -eq 2) {
+        $ffmpeg_aac_cmd = "libfdk_aac -ac 2"
+        $transcode_msg = "$transcode_msg + libfdk AAC (2 channel)"
+    }
+    if ($ffmpeg_aac -eq 1) {
+        $ffmpeg_aac_cmd = "aac -ac 2" 
+        $transcode_msg = "$transcode_msg + AAC (2 channel)"
+    }
+
+    if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
+
+    if ($ffmpeg_eng -eq 1) {
+        $ffmpeg_eng_cmd = "0:m:language:eng?" 
+        $transcode_msg = "$transcode_msg, english only"
+    }
+    if ($ffmpeg_eng -eq 0) { $ffmpeg_eng_cmd = "0" }
+
+    if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
+    if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null } 
+
     if ($ffmpeg_aac -eq 2) { $ffmpeg_aac_cmd = "libfdk_aac -ac 2" }
     if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac -ac 2" }
 
     $transcode_msg = "$transcode_msg..."
-
     Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"      
     Start-Sleep 1
+
+    # Main FFMPEG Params 
+    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"""
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
 
     if ($err) {
-        Write-Log "$job - $video_name $err"
+        Write-Log "$job - $err"
     }
 
     $end_time = (GET-Date)
