@@ -12,7 +12,7 @@ function Write-Log  ([string] $LogString) {
 
         $mutexName = 'Write-Log'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
+        $mutex.WaitOne() 
         try {
             Add-content $LogFile -value $LogMessage -Encoding utf8
         }
@@ -29,7 +29,7 @@ function Write-Skip ([string] $video_name) {
 
         $mutexName = 'Write-Skip'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
+        $mutex.WaitOne() 
         try {
             Add-content $LogFile -value $video_name -Encoding utf8
         }
@@ -45,7 +45,7 @@ function Write-SkipError ([string] $video_name) {
 
         $mutexName = 'Write-SkipError'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
+        $mutex.WaitOne() 
         try {
             Add-content $LogFile -value $video_name -Encoding utf8
         }
@@ -61,7 +61,7 @@ function Write-SkipHEVC ([string] $video_name) {
 
         $mutexName = 'Write-SkipHEVC'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
+        $mutex.WaitOne() 
         try {
             Add-content $LogFile -value $video_name -Encoding utf8
         }
