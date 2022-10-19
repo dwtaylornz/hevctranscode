@@ -123,7 +123,7 @@ if (test-path -PathType leaf output\$video_name) {
     if ($video_width -gt 1920) { Write-Log "  New Transcoded Video Width: $video_width -> 1920" }
               
     # confirm move file is enabled, has audio and video stream.
-    if ($move_file -eq 1 -AND $video_duration_formated -eq $video_new_duration_formated -AND $null -ne $video_new_videocodec -AND $null -ne $video_new_audiocodec) {    
+    if ($move_file -eq 1 -AND $video_duration_formated -eq $video_new_duration_formated -AND $null -ne $video_new_videocodec -AND $null -ne $video_new_audiocodec -AND $diff -gt $ffmpeg_min_diff) {    
 
         Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         if ($influx_address -AND $influx_db) {
@@ -142,8 +142,15 @@ if (test-path -PathType leaf output\$video_name) {
     }   
 
     else {
+
+        if ($diff -lt $ffmpeg_min_diff) {
+            Write-Log "$job - $video_name ERROR, min difference not achieved ($diff < $ffmpeg_min_diff), File - NOT copied" 
+            Start-sleep 1
+            Remove-Item output\$video_name
+            Write-SkipError $video_name
+        }
         
-        if ($video_duration_formated -ne $video_new_duration_formated) { 
+        elseif ($video_duration_formated -ne $video_new_duration_formated) { 
             Write-Log "$job - $video_name ERROR, incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
             Start-sleep 1
             Remove-Item output\$video_name
@@ -167,10 +174,22 @@ if (test-path -PathType leaf output\$video_name) {
             Write-Log "$job - $video_name move file disabled, File - NOT copied" 
         }
         else { 
-            Write-Log "$job - $video_name ERROR, File - NOT copied"
-            Start-sleep 1
-            # Remove-Item output\$video_name
-            Write-SkipError $video_name
+            Write-Log "$job - $video_name ERROR, How did i get here? - copying file (fingers crossed)"
+            Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
+            if ($influx_address -AND $influx_db) {
+                Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null 
+            } 
+            Start-delay
+    
+            try {
+                Move-item -Path "output\$video_name" -destination "$video_path" -Force 
+                Write-SkipHEVC $video_name
+            }
+            catch {
+                Write-Log "Error moving $video_name back to source location - Check permissions"   
+                Write-Log $_.exception.message 
+            }
+
         }
         
     }            
