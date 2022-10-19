@@ -12,7 +12,7 @@ function Write-Log  ([string] $LogString) {
 
         $mutexName = 'Write-Log'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $mutex.WaitOne() 
+        $check = $mutex.WaitOne() 
         try {
             Add-content $LogFile -value $LogMessage -Encoding utf8
         }
