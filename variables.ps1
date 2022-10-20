@@ -16,7 +16,7 @@ $ffmpeg_aac = 2 # 0 copies audio (no changes), set to 1 if you want to transcode
 $ffmpeg_eng = 0 # set to 1 to only keep english audio tracks
 $move_file = 1 # set to 0 for testing (check .\output directory) 
 $convert_1080p = 1 # 1 will convert higher resolution videos down to 1080p , 0 will not
-$min_video_size = .5 # min size in GB of video before it will quit
+$min_video_size = 0 # min size in GB of video before it will quit
 $GPU_threads = 2 # how many GPU jobs at same time 
 
 # Write to influx

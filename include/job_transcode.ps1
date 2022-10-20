@@ -159,7 +159,6 @@ if (test-path -PathType leaf output\$video_name) {
 
     # File passes all checks, move....
     else { 
-        # Write-Log "$job - $video_name ERROR, How did i get here? - moving file (fingers crossed)"
         Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
         if ($influx_address -AND $influx_db) {
             Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null 
