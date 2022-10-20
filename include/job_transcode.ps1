@@ -125,6 +125,13 @@ if (test-path -PathType leaf output\$video_name) {
         Remove-Item "output\$video_name"
         Write-SkipError "$video_name"
     }
+
+    elseif ($diff_percent -eq 100) { 
+        Write-Log "$job - $video_name ERROR, zero file size ($diff_percent reduction), File - NOT copied" 
+        Start-sleep 1
+        Remove-Item "output\$video_name"
+        Write-SkipError "$video_name"
+    }
         
     elseif ($video_duration_formated -ne $video_new_duration_formated) { 
         Write-Log "$job - $video_name ERROR, incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
@@ -158,7 +165,6 @@ if (test-path -PathType leaf output\$video_name) {
             Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null 
         } 
         Start-delay
-    
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
             Write-SkipHEVC $video_name
