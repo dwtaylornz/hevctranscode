@@ -73,7 +73,7 @@ function Write-SkipHEVC ([string] $video_name) {
 
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
-    $video_codec = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`")
+    $video_codec = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`")
     # if (Select-String -pattern "hevc" -InputObject $video_codec -quiet) { $video_codec = "hevc" }
     # if (Select-String -pattern "h264" -InputObject $video_codec -quiet) { $video_codec = "h264" } 
     # if (Select-String -pattern "vc1" -InputObject $video_codec -quiet) { $video_codec = "vc1" }          
@@ -85,7 +85,7 @@ function Get-VideoCodec ([string] $video_path) {
 }
 
 function Get-AudioCodec ([string] $video_path) {
-    $audio_codec = .\ffprobe.exe -v error -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
+    $audio_codec = .\ffprobe.exe -v quiet -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
     return $audio_codec
 }
 
@@ -93,7 +93,7 @@ function Get-AudioCodec ([string] $video_path) {
 function Get-VideoWidth ([string] $video_path) {
     #check video width (1920 width is more consistant for 1080p videos)
     $video_width = $null 
-    $video_width = (.\ffprobe.exe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
+    $video_width = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
     $video_width = $video_width.trim()
     $video_width = $video_width -as [Int]
     return $video_width
@@ -102,7 +102,7 @@ function Get-VideoWidth ([string] $video_path) {
 function Get-VideoDuration ([string] $video_path) {
     #check video length
     $video_duration = $null 
-    $video_duration = (.\ffprobe.exe -v error -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
+    $video_duration = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
     $video_duration = $video_duration.trim()
     return $video_duration
 }

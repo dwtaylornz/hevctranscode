@@ -31,7 +31,7 @@ $start_time = (GET-Date)
 
 # Add to skip file so it is not processed again
 # do at beginning so that stuff that times out does not get processed again. 
-Write-Skip $video_name
+Write-Skip "$video_name"
 
 # GPU Offload...
 if ($video_codec -ne "hevc" ) {
@@ -70,16 +70,15 @@ if ($video_codec -ne "hevc" ) {
 
     $transcode_msg = "$transcode_msg..."
     Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"      
-    Start-Sleep 1
-
+ 
     # Main FFMPEG Params 
-    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"""
+    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `'$video_path`' $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 `'output\$video_name`' "
+    # echo $ffmpeg_params
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
-
     if ($err) {
-        Write-Log "$job - $err"
+        Write-Log "$job - $video_name $err"
     }
-
+    
     $end_time = (GET-Date)
 
     # calc time taken 
@@ -95,6 +94,8 @@ if ($video_codec -ne "hevc" ) {
 }
 
 if (test-path -PathType leaf output\$video_name) {        
+
+    Start-Sleep 1
 
     # check size of new file 
     $video_new = Get-ChildItem output\$video_name | Select-Object Fullname, extension, length
@@ -118,31 +119,31 @@ if (test-path -PathType leaf output\$video_name) {
     if ($video_width -gt 1920) { Write-Log "  New Transcoded Video Width: $video_width -> 1920" }
               
     # run checks, if ok then move... 
-    if ($diff -lt $ffmpeg_min_diff) {
+    if ($diff_percent -lt $ffmpeg_min_diff ) {
         Write-Log "$job - $video_name ERROR, min difference not achieved ($diff < $ffmpeg_min_diff), File - NOT copied" 
         Start-sleep 1
-        Remove-Item output\$video_name
-        Write-SkipError $video_name
+        Remove-Item "output\$video_name"
+        Write-SkipError "$video_name"
     }
         
     elseif ($video_duration_formated -ne $video_new_duration_formated) { 
         Write-Log "$job - $video_name ERROR, incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
         Start-sleep 1
-        Remove-Item output\$video_name
-        Write-SkipError $video_name
+        Remove-Item "output\$video_name"
+        Write-SkipError "$video_name"
     }
 
     elseif ($null -eq $video_new_videocodec) { 
         Write-Log "$job - $video_name ERROR, no video stream detected, File - NOT copied" 
         Start-sleep 1
-        Remove-Item output\$video_name
-        Write-SkipError $video_name
+        Remove-Item "output\$video_name"
+        Write-SkipError "$video_name"
     }
     elseif ($null -eq $video_new_audiocodec) { 
         Write-Log "$job - $video_name ERROR, no audio stream detected, File - NOT copied" 
         Start-sleep 1
-        Remove-Item output\$video_name
-        Write-SkipError $video_name
+        Remove-Item "output\$video_name"
+        Write-SkipError "$video_name"
     }
 
     elseif ($move_file -eq 0) { 
@@ -166,9 +167,7 @@ if (test-path -PathType leaf output\$video_name) {
             Write-Log "Error moving $video_name back to source location - Check permissions"   
             Write-Log $_.exception.message 
         }
-
     }   
-        
 }
 
 Else {   
