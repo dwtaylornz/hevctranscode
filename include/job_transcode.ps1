@@ -93,7 +93,7 @@ if ($video_codec -ne "hevc" ) {
     # Write-Log "$job Job - $video_name ($run_time_current/$scan_period)"         
 }
 
-if (test-path -PathType leaf output\$video_name) {        
+if (test-path -PathType leaf `'output\$video_name`') {        
 
     Start-Sleep 1
 
