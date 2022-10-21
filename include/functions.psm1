@@ -103,7 +103,7 @@ function Get-VideoDuration ([string] $video_path) {
     #check video length
     $video_duration = $null 
     $video_duration = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
-    $video_duration = $video_duration.trim()
+    $video_duration = [int]$video_duration.trim()
     return $video_duration
 }
 

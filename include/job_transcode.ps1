@@ -25,7 +25,7 @@ $video_width = Get-VideoWidth $video_path
 
 # check video duration 
 $video_duration = Get-VideoDuration $video_path
-$video_duration_formated = Get-VideoDurationFormatted $video_duration 
+# $video_duration_formated = Get-VideoDurationFormatted $video_duration 
 
 $start_time = (GET-Date)
 
@@ -107,7 +107,7 @@ if (test-path -PathType leaf output\$video_name) {
     # check video length 
     $video_new_duration = $null 
     $video_new_duration = Get-VideoDuration output\$video_name
-    $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
+    # $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
 
     # check new media audio and video codec
     $video_new_videocodec = $null
@@ -115,31 +115,27 @@ if (test-path -PathType leaf output\$video_name) {
     $video_new_audiocodec = $null
     $video_new_audiocodec = Get-AudioCodec output\$video_name
                  
-    
     if ($video_width -gt 1920) { Write-Log "  New Transcoded Video Width: $video_width -> 1920" }
               
     # run checks, if ok then move... 
-    if ($diff_percent -lt $ffmpeg_min_diff ) {
-        Write-Log "$job - $video_name ERROR, min difference not achieved ($diff < $ffmpeg_min_diff), File - NOT copied" 
+    if ($diff_percent -eq 100 -OR $video_new_size -eq 0) { 
+        Write-Log "$job - $video_name ERROR, zero file size ($diff_percent% reduction, $video_new_size`GB`), File - NOT copied" 
         Start-sleep 1
         Remove-Item "output\$video_name"
         Write-SkipError "$video_name"
     }
-
-    elseif ($diff_percent -eq 100) { 
-        Write-Log "$job - $video_name ERROR, zero file size ($diff_percent reduction), File - NOT copied" 
+    elseif ($diff_percent -lt $ffmpeg_min_diff ) {
+        Write-Log "$job - $video_name ERROR, min difference not achieved ($diff_percent% < $ffmpeg_min_diff%) $video_size`GB -> $video_new_size`GB, File - NOT copied" 
+        Start-sleep 1
+        Remove-Item "output\$video_name"
+        Write-SkipError "$video_name"
+    }      
+    elseif ($video_new_duration -lt ($video_duration - 5) -OR $video_new_duration -gt ($video_duration + 5)) { 
+        Write-Log "$job - $video_name ERROR, incorrect duration on new video ($video_duration -> $video_new_duration), File - NOT copied" 
         Start-sleep 1
         Remove-Item "output\$video_name"
         Write-SkipError "$video_name"
     }
-        
-    elseif ($video_duration_formated -ne $video_new_duration_formated) { 
-        Write-Log "$job - $video_name ERROR, incorrect duration on new video ($video_duration_formated -> $video_new_duration_formated), File - NOT copied" 
-        Start-sleep 1
-        Remove-Item "output\$video_name"
-        Write-SkipError "$video_name"
-    }
-
     elseif ($null -eq $video_new_videocodec) { 
         Write-Log "$job - $video_name ERROR, no video stream detected, File - NOT copied" 
         Start-sleep 1
@@ -152,11 +148,9 @@ if (test-path -PathType leaf output\$video_name) {
         Remove-Item "output\$video_name"
         Write-SkipError "$video_name"
     }
-
     elseif ($move_file -eq 0) { 
         Write-Log "$job - $video_name move file disabled, File - NOT copied" 
     }
-
     # File passes all checks, move....
     else { 
         Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
