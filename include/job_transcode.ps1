@@ -72,7 +72,7 @@ if ($video_codec -ne "hevc" ) {
     Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"      
  
     # Main FFMPEG Params 
-    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `'$video_path`' $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 `'output\$video_name`' "
+    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i ""$video_path"" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 ""output\$video_name"" "
     # echo $ffmpeg_params
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
     if ($err) {
@@ -93,7 +93,7 @@ if ($video_codec -ne "hevc" ) {
     # Write-Log "$job Job - $video_name ($run_time_current/$scan_period)"         
 }
 
-if (test-path -PathType leaf `'output\$video_name`') {        
+if (test-path -PathType leaf ""output\$video_name"") {        
 
     Start-Sleep 1
 
