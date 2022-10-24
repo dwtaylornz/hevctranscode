@@ -119,7 +119,7 @@ if (test-path -PathType leaf "output\$video_name") {
               
     # run checks, if ok then move... 
     if ($diff_percent -eq 100 -OR $video_new_size -eq 0) { 
-        Write-Log "$job - $video_name ERROR, zero file size ($diff_percent% reduction, $video_new_size`GB`), File - NOT copied" 
+        Write-Log "$job - $video_name ERROR, zero file size ($video_new_size`GB`), File - NOT copied" 
         Start-sleep 1
         Remove-Item "output\$video_name"
         Write-SkipError "$video_name"

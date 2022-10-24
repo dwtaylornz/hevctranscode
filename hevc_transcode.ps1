@@ -13,6 +13,10 @@ if ($RootDir -eq "") {
 
 Import-Module ".\include\functions.psm1" -Force
 
+Write-Host 
+Write-Log "Starting..."
+Write-Host ""
+
 # Get-Variables
 . (Join-Path $RootDir variables.ps1)
 
