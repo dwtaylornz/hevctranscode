@@ -95,7 +95,7 @@ function Get-VideoWidth ([string] $video_path) {
     $video_width = $null 
     $video_width = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
     $video_width = $video_width.trim()
-    $video_width = $video_width -as [Int]
+    $video_width = [Int]$video_width
     return $video_width
 }
 
@@ -103,7 +103,8 @@ function Get-VideoDuration ([string] $video_path) {
     #check video length
     $video_duration = $null 
     $video_duration = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries format=duration -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
-    $video_duration = [int]$video_duration.trim()
+    $video_duration = $video_duration.trim()
+    $video_duration = [int]$video_duration
     return $video_duration
 }
 
