@@ -157,7 +157,6 @@ function Invoke-HealthCheck() {
 }
 
 # File stuff 
-
 function Get-Skip() {
     $cnt = 0
     if ((test-path -PathType leaf $media_path\skip.txt)) { 
@@ -315,7 +314,7 @@ function Write-SkipHEVC ([string] $video_name) {
         do {
             $cnt++
             try {
-                Add-content $LogFile -value $video_name -Encoding utf8
+                Add-content $LogFile -value $video_name -Encoding utf8 -ErrorAction Stop
                 return 
             }
             catch {
