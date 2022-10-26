@@ -1,75 +1,5 @@
 
-function Write-Log  ([string] $LogString) {
-    if ($LogString) {
-        $Logfile = ".\hevc_transcode.log"
-        $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
-        $LogMessage = "$Stamp $LogString"
 
-        if ($LogString -like '*transcoding*') {Write-Host "$LogMessage" -ForegroundColor Cyan }
-        elseif ($LogString -like '*ERROR*') {Write-Host "$LogMessage" -ForegroundColor Red }
-        elseif ($LogString -like '*Saved*') {Write-Host "$LogMessage" -ForegroundColor Green }
-        else {Write-Host "$LogMessage"}
-
-        $mutexName = 'Write-Log'
-        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
-        try {
-            Add-content $LogFile -value $LogMessage -Encoding utf8
-        }
-        finally {
-            $mutex.ReleaseMutex()
-        }       
-    }
-}
-
-function Write-Skip ([string] $video_name) {
-    if ($video_name) { 
-        $Logfile = "skip.txt"
-        # start-sleep -Seconds (0..5 | get-random)
-
-        $mutexName = 'Write-Skip'
-        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
-        try {
-            Add-content $LogFile -value $video_name -Encoding utf8
-        }
-        finally {
-            $mutex.ReleaseMutex()
-        }      
-    }
-}
-
-function Write-SkipError ([string] $video_name) {
-    if ($video_name) { 
-        $Logfile = "skiperror.txt"
-
-        $mutexName = 'Write-SkipError'
-        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
-        try {
-            Add-content $LogFile -value $video_name -Encoding utf8
-        }
-        finally {
-            $mutex.ReleaseMutex()
-        }      
-    }
-}
-
-function Write-SkipHEVC ([string] $video_name) {
-    if ($video_name) { 
-        $Logfile = "skiphevc.txt"
-
-        $mutexName = 'Write-SkipHEVC'
-        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
-        $check = $mutex.WaitOne() 
-        try {
-            Add-content $LogFile -value $video_name -Encoding utf8
-        }
-        finally {
-            $mutex.ReleaseMutex()
-        }    
-    }
-}
 
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
@@ -88,7 +18,6 @@ function Get-AudioCodec ([string] $video_path) {
     $audio_codec = .\ffprobe.exe -v quiet -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
     return $audio_codec
 }
-
 
 function Get-VideoWidth ([string] $video_path) {
     #check video width (1920 width is more consistant for 1080p videos)
@@ -130,18 +59,38 @@ function Start-Delay {
     Start-Sleep 5
 }
 
-function Show-State () {
-    . .\variables.ps1
+function Show-State() {
+
+
+    # Get previously skipped files from skip.log
+    $skipped_files = Get-Skip
+    $skippederror_files = Get-SkipError
+    $skippedhevc_files = Get-SkipHEVC
+
+    # $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
+    $skiptotal_count = $skipped_files.Count + $skippederror_files.Count + $skippedhevc_files.Count
+
+    Write-Host "Previously processed files: $($skipped_files.Count)" 
+    Write-Host "Previously errored files: $($skippederror_files.Count)" 
+    Write-Host "Existing HEVC files: $($skippedhevc_files.Count)" 
+    Write-Host ""    
+    Write-Host "Total files to skip: $skiptotal_count"
+
+
     Write-Host ""
+
     Write-Host -NoNewLine "Settings - " 
-    Write-Host -NoNewline "GPU Type: "
+    Write-Host -NoNewline "Encoding: "
     Write-Host -NoNewLine -ForegroundColor Green "$ffmpeg_codec"
+
+    if ($ffmpeg_hwdec -eq 0) {
+        Write-Host -NoNewline " Decoding: "
+        Write-Host -noNewLine -ForegroundColor Green "CPU"
+    }
     if ($ffmpeg_hwdec -eq 1) {
         Write-Host -NoNewline " GPU Decoding: "
-        Write-Host -noNewLine -ForegroundColor Green "Enabled"
+        Write-Host -noNewLine -ForegroundColor Green "GPU"
     }
-    # Write-Host -NoNewline " Exec Path: " 
-    # Write-Host -NoNewLine -ForegroundColor Green "$RootDir"
        
     Write-Host ""    
     Write-Host ""   
@@ -162,13 +111,13 @@ function Initialize-Folders() {
 function Get-Videos() {
     # get-job -State Completed | Remove-Job
     get-job -Name Scan -ea silentlycontinue | Stop-Job -ea silentlycontinue | Out-Null
-    if (-not(test-path -PathType leaf .\scan_results.csv) -or $scan_at_start -eq 1) { 
+    if (-not(test-path -PathType leaf $media_path\scan_results.csv) -or $scan_at_start -eq 1) { 
         # Stop-Job Scan -ea silentlycontinue
         Write-Host  -NoNewline "Running file scan... " 
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         Receive-Job -name "Scan" -wait -Force
         Start-Sleep 2 
-        $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
+        $videos = @(Import-Csv -Path $media_path\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
         Write-Host " files: " $file_count
     }
@@ -176,7 +125,7 @@ function Get-Videos() {
     else {
         
         Write-Host -NoNewline "Getting previous scan results & running new scan in background: " 
-        $videos = @(Import-Csv -Path .\scan_results.csv -Encoding utf8)
+        $videos = @(Import-Csv -Path $media_path\scan_results.csv -Encoding utf8)
         $file_count = $videos.Count
         Write-Host $file_count
         Write-Host ""
@@ -195,59 +144,177 @@ function Invoke-HealthCheck() {
 
 }
 
-function Get-Skip() {
+# File stuff 
 
-    Write-Host -NoNewLine "Getting previously processed files: " 
-    if ((test-path -PathType leaf skip.txt)) { 
-        $skipped_files = @(Get-Content -Path skip.txt -Encoding utf8)
-        $skip_count = $skipped_files.Count
+function Get-Skip() {
+    $cnt = 0
+    if ((test-path -PathType leaf $media_path\skip.txt)) { 
+        do {
+            $cnt++
+            try {
+
+                $skipped_files = @(Get-Content -Path $media_path\skip.txt -Encoding utf8 -ErrorAction Stop) 
+                return $skipped_files
+            }
+            catch {
+                $rnd = Get-Random -Minimum 1 -Maximum 5
+                Start-Sleep $rnd
+            }
+        } while ($cnt -lt 100)
+      
+        Write-Host "Unable to read from skip file"  
+        exit
+        
     }
-    else { $skip_count = 0 }
-    Write-Host "$skip_count"
-    return $skip_count, $skipped_files
+
+    return $skipped_files
+    
 }
 
 function Get-SkipError() {
+    $cnt = 0
 
-    Write-Host -NoNewLine "Getting previously skipped (error) files: " 
-    if ((test-path -PathType leaf skiperror.txt)) { 
-        $skippederror_files = @(Get-Content -Path skiperror.txt -Encoding utf8)
-        $skiperror_count = $skippederror_files.Count
+    if ((test-path -PathType leaf $media_path\skiperror.txt)) { 
+
+
+        do {
+            $cnt++
+            try {
+
+                $skippederror_files = @(Get-Content -Path $media_path\skiperror.txt -Encoding utf8 -ErrorAction Stop) 
+                return $skippederror_files
+            }
+            catch {
+                $rnd = Get-Random -Minimum 1 -Maximum 5
+                Start-Sleep $rnd
+            }
+        } while ($cnt -lt 100)
+
+        Write-Host "Unable to read from skiperror file"  
+        exit
+
+        
     }
-    else { $skiperror_count = 0 }
-    Write-Host "$skiperror_count"
-    return $skiperror_count, $skippederror_files
+
+    return $skippederror_files
 }
 
 function Get-SkipHEVC() {
+    $cnt = 0
+ 
+    if ((test-path -PathType leaf $media_path\skiphevc.txt)) { 
 
-    Write-Host -NoNewLine "Getting previously skipped (HEVC) files: " 
-    if ((test-path -PathType leaf skiphevc.txt)) { 
-        $skippedhevc_files = @(Get-Content -Path skiphevc.txt -Encoding utf8)
-        $skiphevc_count = $skippedhevc_files.Count
-    }
-    else { $skiphevc_count = 0 }
-    Write-Host "$skiphevc_count"
-    return $skiphevc_count, $skippedhevc_files
-}
-
-function Get-VideosToProcess($file_count, $skip_count) {
-
-    $video_count = ($file_count - $skip_count)
-    Write-Host ""
-    Write-Host "Total videos to process: $video_count"
-}
-
-function Test-VideoPath($path) {
-
-    $check = test-path "$path"
-
-    while ($check -eq $false) {
-        start-sleep 2
-        write-host "Cannot get to path?..."
-        $check = test-path "$path"
+        do {
+            $cnt++
+            try {
+                $skippedhevc_files = @(Get-Content -Path $media_path\skiphevc.txt -Encoding utf8 -ErrorAction Stop) 
+                return $skippedhevc_files
+            }
+            catch {
+                $rnd = Get-Random -Minimum 1 -Maximum 5
+                Start-Sleep $rnd
+            }
+        } while ($cnt -lt 100)
+      
+        Write-Host "Unable to read from skiphevc file"  
+        exit
     }
 
+    return  $skippedhevc_files
+}
+
+function Write-Log  ([string] $LogString) {
+    if ($LogString) {
+        $Logfile = "$media_path\hevc_transcode.log"
+        $Stamp = (Get-Date).toString("yy/MM/dd HH:mm:ss")
+        $LogMessage = "$Stamp $env:computername $LogString"
+        if ($LogString -like '*transcoding*') { Write-Host "$LogMessage" -ForegroundColor Cyan }
+        elseif ($LogString -like '*ERROR*') { Write-Host "$LogMessage" -ForegroundColor Red }
+        elseif ($LogString -like '*Saved*') { Write-Host "$LogMessage" -ForegroundColor Green }
+        else { Write-Host "$LogMessage" }
+        $cnt = 0
+    
+        do {
+            $cnt++
+            try {
+                Add-content $LogFile -value $LogMessage -Encoding utf8 -ErrorAction Stop
+                return 
+            }
+            catch {
+                $rnd = Get-Random -Minimum 1 -Maximum 5
+                Start-Sleep $rnd
+            }
+        } while ($cnt -lt 100)
+        Write-Host "Unable to write to log file"  
+        exit
+    }
+}
+
+function Write-Skip ([string] $video_name) {
+    if ($video_name) { 
+        $Logfile = "$media_path\skip.txt"
+        $cnt = 0
+    
+        do {
+            $cnt++
+            try {
+                Add-content $LogFile -value $video_name -Encoding utf8 -ErrorAction Stop
+                return 
+            }
+            catch {
+                $rnd = Get-Random -Minimum 1 -Maximum 5
+                Start-Sleep $rnd
+            }
+        } while ($cnt -lt 100)
+
+        Write-Host "Unable to write to skip file"  
+        exit
+  
+    }
+}
+
+function Write-SkipError ([string] $video_name) {
+    if ($video_name) { 
+        $Logfile = "$media_path\skiperror.txt"
+        $cnt = 0
+    
+        do {
+            $cnt++
+            try {
+                Add-content $LogFile -value $video_name -Encoding utf8 -ErrorAction Stop
+                return 
+            }
+            catch {
+                $rnd = Get-Random -Minimum 1 -Maximum 5
+                Start-Sleep $rnd
+            }
+        } while ($cnt -lt 100)
+        Write-Host "Unable to write to skiperror file"  
+        exit
+
+    }
+}
+
+function Write-SkipHEVC ([string] $video_name) {
+    if ($video_name) { 
+        $Logfile = "$media_path\skiphevc.txt"
+        $cnt = 0
+    
+        do {
+            $cnt++
+            try {
+                Add-content $LogFile -value $video_name -Encoding utf8
+                return 
+            }
+            catch {
+                $rnd = Get-Random -Minimum 1 -Maximum 5
+                Start-Sleep $rnd
+            }
+        } while ($cnt -lt 100)
+
+        Write-Host "Unable to write to skiphevc file"  
+        exit
+    }
 }
 
 Export-ModuleMember -Function *

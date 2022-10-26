@@ -3,7 +3,7 @@
 #
 # script will loop through largest to smallest videos transcoding to HEVC
 # populate variables.ps1 before running this script. 
-# TODO - ffprobe to confirm that audio & video track still exist (rather than size check). ffprobe - length check, and video / audio check should be sufficient to check if healthy. 
+# TODO - make it multi machine! 
 
 Set-Location $PSScriptRoot
 $RootDir = $PSScriptRoot
@@ -13,7 +13,7 @@ if ($RootDir -eq "") {
 
 Import-Module ".\include\functions.psm1" -Force
 
-Write-Host 
+Write-Host ""
 Write-Log "Starting..."
 Write-Host ""
 
@@ -29,18 +29,19 @@ $file_count, $videos = Get-Videos
 # run health check job 
 Invoke-HealthCheck
 
-# Get previously skipped files from skip.log
-$skip_count, $skipped_files = Get-Skip
-$skiperror_count, $skippederror_files = Get-SkipError
-$skiphevc_count, $skippedhevc_files = Get-SkipHEVC
-
-$skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
-    
 #Show settings and any jobs running 
 Show-State
 
 #Main Loop across videos 
 Foreach ($video in $videos) {
+
+    # Write-Host -NoNewline "."
+
+    $skipped_files = Get-Skip
+    # $skippederror_files = Get-SkipError
+    # $skippedhevc_files = Get-SkipHEVC
+
+    $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
 
     if ($($video.name) -notin $skiptotal_files) {
 
