@@ -111,6 +111,7 @@ function Initialize-Folders() {
 function Get-Videos() {
     # get-job -State Completed | Remove-Job
     get-job -Name Scan -ea silentlycontinue | Stop-Job -ea silentlycontinue | Out-Null
+    
     if (-not(test-path -PathType leaf $media_path\scan_results.csv) -or $scan_at_start -eq 1) { 
         # Stop-Job Scan -ea silentlycontinue
         Write-Host  -NoNewline "Running file scan... " 
@@ -122,7 +123,7 @@ function Get-Videos() {
         Write-Host " files: " $file_count
     }
     
-    else {
+    elseif ($scan_at_start -eq 0) {
         
         Write-Host -NoNewline "Getting previous scan results & running new scan in background: " 
         $videos = @(Import-Csv -Path $media_path\scan_results.csv -Encoding utf8)
@@ -130,8 +131,19 @@ function Get-Videos() {
         Write-Host $file_count
         Write-Host ""
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
+
+    }
+
+    elseif ($scan_at_start -eq 2) {
+    
+        Write-Host -NoNewline "Getting previous scan results: " 
+        $videos = @(Import-Csv -Path $media_path\scan_results.csv -Encoding utf8)
+        $file_count = $videos.Count
+        Write-Host $file_count
+        Write-Host ""
     
     }
+    
 
     return $file_count, $videos
 }

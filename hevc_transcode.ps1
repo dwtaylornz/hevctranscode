@@ -32,16 +32,17 @@ Invoke-HealthCheck
 #Show settings and any jobs running 
 Show-State
 
+# if single machine here - 
+$skipped_files = Get-Skip
+$skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
+
 #Main Loop across videos 
 Foreach ($video in $videos) {
 
     # Write-Host -NoNewline "."
-
-    $skipped_files = Get-Skip
-    # $skippederror_files = Get-SkipError
-    # $skippedhevc_files = Get-SkipHEVC
-
-    $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
+    # if multi machine here - 
+    # $skipped_files = Get-Skip
+    # $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
 
     if ($($video.name) -notin $skiptotal_files) {
 
