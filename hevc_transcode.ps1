@@ -14,7 +14,7 @@ if ($RootDir -eq "") {
 Import-Module ".\include\functions.psm1" -Force
 
 Write-Host ""
-Write-Log "Starting..."
+Write-Log " Starting..."
 Write-Host ""
 
 # Get-Variables
@@ -29,20 +29,25 @@ $file_count, $videos = Get-Videos
 # run health check job 
 Invoke-HealthCheck
 
+# Get previously skipped files from skip.log
+$skipped_files = Get-Skip
+$skippederror_files = Get-SkipError
+$skippedhevc_files = Get-SkipHEVC
+
 #Show settings and any jobs running 
 Show-State
 
 # if single machine here - 
-$skipped_files = Get-Skip
 $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
 
 #Main Loop across videos 
 Foreach ($video in $videos) {
 
-    # Write-Host -NoNewline "."
-    # if multi machine here - 
+    # if multi machine here - as skipped files may be updated by other computers 
     # $skipped_files = Get-Skip
     # $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
+
+    # Write-Host -NoNewline "."
 
     if ($($video.name) -notin $skiptotal_files) {
 
@@ -70,7 +75,7 @@ Foreach ($video in $videos) {
                 # clear completed or stopped jobs 
                 if ($gpu_state -eq "Completed" -OR $gpu_state -eq "Stopped") { 
                     Receive-Job -name "GPU-$thread" 
-                    remove-job -name "GPU-$thread" -Force 
+                    remove-job -name "GPU-$thread" -Force
                 }   
 
                 # has thread run too long? 
@@ -81,7 +86,7 @@ Foreach ($video in $videos) {
                 if ($gpu_state -ne "Running") {
                     if ($ffmpeg_hwdec -eq 1) { $hw = "DE" }
                     else { $hw = "E" }
-                    Start-Job -Name "GPU-$thread" -FilePath .\include\job_transcode.ps1 -ArgumentList $RootDir, $video, "GPU($thread$hw)" | Out-Null 
+                    Start-Job -Name "GPU-$thread" -FilePath .\include\job_transcode.ps1 -ArgumentList $RootDir, $video, "($thread$hw)" | Out-Null 
                     $done = 1 
                     break
                 }       
