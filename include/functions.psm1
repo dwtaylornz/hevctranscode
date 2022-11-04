@@ -128,16 +128,16 @@ function Get-Videos() {
         Receive-Job -name "Scan" -wait -Force
         Start-Sleep 2 
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
-        $file_count = $videos.Count
-        Write-Host " files: " $file_count
+        # $file_count = $videos.Count
+        Write-Host " files: " $videos.Count
     }
     
     elseif ($scan_at_start -eq 0) {
         
         Write-Host -NoNewline "Getting previous scan results & running new scan in background: " 
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
-        $file_count = $videos.Count
-        Write-Host $file_count
+        # $file_count = $videos.Count
+        Write-Host $videos.Count
         Write-Host ""
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
 
@@ -147,14 +147,14 @@ function Get-Videos() {
     
         Write-Host -NoNewline "Getting previous scan results: " 
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
-        $file_count = $videos.Count
-        Write-Host $file_count
+        # $file_count = $videos.Count
+        Write-Host $videos.Count
         Write-Host ""
     
     }
     
 
-    return $file_count, $videos
+    return $videos
 }
 function Get-Skip() {
 

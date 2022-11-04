@@ -22,12 +22,12 @@ Write-Host ""
 
 # Setup temp output folder, and clear previous transcodes
 Initialize-Folders
-  
-# Get Videos - run Scan job at $media_path or retrive videos from .\scan_results
-$file_count, $videos = Get-Videos
 
 # run health check job 
 Invoke-HealthCheck
+
+# Get Videos - run Scan job at $media_path or retrive videos from .\scan_results
+$videos = Get-Videos
 
 # Get previously skipped files from skip.log
 $skipped_files = Get-Skip
@@ -41,13 +41,18 @@ Show-State
 $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
 
 #Main Loop across videos 
+$queue_timer = Get-Date
 Foreach ($video in $videos) {
 
-    # if multi machine here - as skipped files may be updated by other computers 
-    # $skipped_files = Get-Skip
-    # $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
-
-    # Write-Host -NoNewline "."
+    $duration = $(Get-Date) - $queue_timer
+    if ($duration.TotalMinutes -gt $restart_queue) {
+        $videos = Get-Videos
+        $skipped_files = Get-Skip
+        $skippederror_files = Get-SkipError
+        $skippedhevc_files = Get-SkipHEVC
+        $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
+        $queue_timer = Get-Date
+    }
 
     if ($($video.name) -notin $skiptotal_files) {
 
@@ -97,7 +102,7 @@ Foreach ($video in $videos) {
         }
     }
 }
-Write-Log "ALL DONE - waiting for running jobs to finish then quiting"
+Write-Log " ALL DONE - waiting for running jobs to finish then quiting"
 while (get-job -State Running -ea silentlycontinue) {
     Start-Sleep 1
     Receive-Job *
