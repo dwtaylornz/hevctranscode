@@ -1,9 +1,7 @@
 Set-Location $args[0]
 
 $RootDir = $PSScriptRoot
-if ($RootDir -eq ""){
-    $RootDir = $pwd
-}
+if ($RootDir -eq ""){ $RootDir = $pwd }
 
 # grab variables from var file 
 . (Join-Path $RootDir variables.ps1)

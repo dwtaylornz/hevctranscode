@@ -7,9 +7,7 @@
 
 Set-Location $PSScriptRoot
 $RootDir = $PSScriptRoot
-if ($RootDir -eq "") {
-    $RootDir = $pwd
-}
+if ($RootDir -eq "") { $RootDir = $pwd }
 
 Import-Module ".\include\functions.psm1" -Force
 

@@ -5,9 +5,7 @@ $job = $args[2]
 Import-Module ".\include\functions.psm1" -Force
 
 $RootDir = $PSScriptRoot
-if ($RootDir -eq "") {
-    $RootDir = $pwd
-}
+if ($RootDir -eq "") { $RootDir = $pwd }
 
 # Get-Variables
 . (Join-Path $RootDir variables.ps1)
@@ -19,6 +17,8 @@ $video_size = [math]::Round($video.length / 1GB, 1)
 
 # Write-Host "Check if file is HEVC first..."
 $video_codec = Get-VideoCodec $video_path
+$audio_codec = Get-AudioCodec $video_path
+$audio_channels = Get-AudioChannels $video_path
 
 # check video width (1920 width is more consistant for 1080p videos)
 $video_width = Get-VideoWidth $video_path
@@ -36,59 +36,52 @@ Write-Skip "$video_name"
 # GPU Offload...
 if ($video_codec -ne "hevc" ) {
 
+    $transcode_msg = "transcoding to HEVC"
+
     # NVIDIA TUNING 
     # if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
     # AMD TUNING - 
     if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr" }
-
-    if ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
+    
     if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = $null }
-
-    $transcode_msg = "transcoding to HEVC"
-    if ($ffmpeg_aac -eq 2) {
-        $ffmpeg_aac_cmd = "libfdk_aac -ac 2"
-        $transcode_msg = "$transcode_msg + libfdk AAC (2 channel)"
-    }
-    if ($ffmpeg_aac -eq 1) {
+    elseif ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
+    
+    if ($ffmpeg_aac -eq 0 -OR ($audio_codec -eq "aac" -AND $audio_channels -eq 2)) { $ffmpeg_aac_cmd = "copy" }
+    elseif ($ffmpeg_aac -eq 1) {
         $ffmpeg_aac_cmd = "aac -ac 2" 
         $transcode_msg = "$transcode_msg + AAC (2 channel)"
     }
+    elseif ($ffmpeg_aac -eq 2) {
+        $ffmpeg_aac_cmd = "libfdk_aac -ac 2"
+        $transcode_msg = "$transcode_msg + libfdk AAC (2 channel)"
+    }
 
-    if ($ffmpeg_aac -eq 0) { $ffmpeg_aac_cmd = "copy" }
-
-    if ($ffmpeg_eng -eq 1) {
+    if ($ffmpeg_eng -eq 0) { $ffmpeg_eng_cmd = "0" }
+    elseif ($ffmpeg_eng -eq 1) {
         $ffmpeg_eng_cmd = "0:m:language:eng?" 
         $transcode_msg = "$transcode_msg, english only"
     }
-    if ($ffmpeg_eng -eq 0) { $ffmpeg_eng_cmd = "0" }
 
-    if ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
     if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null } 
-
-    if ($ffmpeg_aac -eq 2) { $ffmpeg_aac_cmd = "libfdk_aac -ac 2" }
-    if ($ffmpeg_aac -eq 1) { $ffmpeg_aac_cmd = "aac -ac 2" }
+    elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
 
     $transcode_msg = "$transcode_msg..."
-    Write-Log "$job - $video_name ($video_codec, $video_width, $video_size`GB`) $transcode_msg"      
+    Write-Log "$job - $video_name ($video_codec, $audio_codec($audio_channels channel), $video_width, $video_size`GB`) $transcode_msg"      
  
     # Main FFMPEG Params 
     $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `"$video_path`" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 `"output\$video_name`" "
     # echo $ffmpeg_params
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
-    if ($err) {
-        Write-Log "$job - $video_name $err"
-    }
+    if ($err) { Write-Log "$job - $video_name $err" }
     
     $end_time = (GET-Date)
 
     # calc time taken 
     $time = $end_time - $start_time
-    $time_hours = $time.hours
-    $time_mins = $time.minutes
     $time_secs = $time.seconds 
-    if ($time_secs -lt 10) { $time_secs = "0$time_secs" }
-    $total_time_formatted = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
-    if ($time_hours -eq 0) { $total_time_formatted = "$time_mins" + ":" + "$time_secs" }
+    if ($time.seconds -lt 10) { $time_secs = "0$time_secs" }
+    if ($time.hours-eq 0) { $total_time_formatted = "$time.minutes" + ":" + "$time_secs" }
+    else { $total_time_formatted = "$time.hours" + ":" + "$time.minutes" + ":" + "$time_secs" }
 
     # Write-Log "$job Job - $video_name ($run_time_current/$scan_period)"         
 }
@@ -107,7 +100,6 @@ if (test-path -PathType leaf "output\$video_name") {
     # check video length 
     $video_new_duration = $null 
     $video_new_duration = Get-VideoDuration output\$video_name
-    # $video_new_duration_formated = Get-VideoDurationFormatted $video_new_duration
 
     # check new media audio and video codec
     $video_new_videocodec = $null
@@ -129,7 +121,13 @@ if (test-path -PathType leaf "output\$video_name") {
         Start-sleep 1
         Remove-Item "output\$video_name"
         Write-SkipError "$video_name"
-    }      
+    } 
+    elseif ($diff_percent -gt $ffmpeg_max_diff ) {
+        Write-Log "$job - $video_name ERROR, max difference not achieved ($diff_percent% > $ffmpeg_max_diff%) $video_size`GB -> $video_new_size`GB, File - NOT copied" 
+        Start-sleep 1
+        Remove-Item "output\$video_name"
+        Write-SkipError "$video_name"
+    }        
     elseif ($video_new_duration -lt ($video_duration - 5) -OR $video_new_duration -gt ($video_duration + 5)) { 
         Write-Log "$job - $video_name ERROR, incorrect duration on new video ($video_duration -> $video_new_duration), File - NOT copied" 
         Start-sleep 1
@@ -148,15 +146,11 @@ if (test-path -PathType leaf "output\$video_name") {
         Remove-Item "output\$video_name"
         Write-SkipError "$video_name"
     }
-    elseif ($move_file -eq 0) { 
-        Write-Log "$job - $video_name move file disabled, File - NOT copied" 
-    }
+    elseif ($move_file -eq 0) { Write-Log "$job - $video_name move file disabled, File - NOT copied" }
     # File passes all checks, move....
     else { 
         Write-Log "$job - $video_name Transcode time: $total_time_formatted, Saved: $diff`GB` ($video_size -> $video_new_size) or $diff_percent%"
-        if ($influx_address -AND $influx_db) {
-            Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null 
-        } 
+        if ($influx_address -AND $influx_db) { Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null } 
         Start-delay
         try {
             Move-item -Path "output\$video_name" -destination "$video_path" -Force 
