@@ -42,6 +42,7 @@ $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
 $queue_timer = Get-Date
 Foreach ($video in $videos) {
 
+    # if duration has exceeded queue timer then re run the scan 
     $duration = $(Get-Date) - $queue_timer
     if ($duration.TotalMinutes -gt $restart_queue) {
         $videos = Get-Videos

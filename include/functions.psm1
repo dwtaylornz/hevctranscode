@@ -133,7 +133,7 @@ function Get-Videos() {
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
         # $file_count = $videos.Count
         Write-Host $videos.Count
-        Write-Host ""
+        # Write-Host ""
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
     }
     elseif ($scan_at_start -eq 2) {
@@ -142,7 +142,7 @@ function Get-Videos() {
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
         # $file_count = $videos.Count
         Write-Host $videos.Count
-        Write-Host "" 
+        # Write-Host "" 
     }
     return $videos
 }
