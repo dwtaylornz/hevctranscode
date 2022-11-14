@@ -78,10 +78,12 @@ if ($video_codec -ne "hevc" ) {
 
     # calc time taken 
     $time = $end_time - $start_time
+    $time_hours = $time.hours
+    $time_mins = $time.minutes
     $time_secs = $time.seconds 
-    if ($time.seconds -lt 10) { $time_secs = "0$time_secs" }
-    if ($time.hours-eq 0) { $total_time_formatted = "$time.minutes" + ":" + "$time_secs" }
-    else { $total_time_formatted = "$time.hours" + ":" + "$time.minutes" + ":" + "$time_secs" }
+    if ($time_secs -lt 10) { $time_secs = "0$time_secs" }
+    $total_time_formatted = "$time_hours" + ":" + "$time_mins" + ":" + "$time_secs" 
+    if ($time_hours -eq 0) { $total_time_formatted = "$time_mins" + ":" + "$time_secs" }
 
     # Write-Log "$job Job - $video_name ($run_time_current/$scan_period)"         
 }
