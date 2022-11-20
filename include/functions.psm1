@@ -2,8 +2,8 @@
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = $null
+    Start-Sleep -Milliseconds 200 
     $video_codec = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`")
-    # $video_codec = (.\ffprobe.exe -loglevel quiet -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`")
     if (Select-String -pattern "hevc" -InputObject $video_codec -quiet) { $video_codec = "hevc" }
     if (Select-String -pattern "h264" -InputObject $video_codec -quiet) { $video_codec = "h264" } 
     if (Select-String -pattern "vc1" -InputObject $video_codec -quiet) { $video_codec = "vc1" }          
@@ -16,14 +16,15 @@ function Get-VideoCodec ([string] $video_path) {
 
 function Get-AudioCodec ([string] $video_path) {
     $audio_codec = $null
+    Start-Sleep -Milliseconds 200 
     $audio_codec = .\ffprobe.exe -v quiet -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
-    # $audio_codec = .\ffprobe.exe -loglevel quiet -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
     # if (Select-String -pattern "dts" -InputObject $audio_codec -quiet) { $audio_codec = "dts" }
     return $audio_codec
 }
 
 function Get-AudioChannels ([string] $video_path) {
     $audio_channels = $null
+    Start-Sleep -Milliseconds 200 
     $audio_channels = .\ffprobe.exe -v quiet -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
     return $audio_channels
 }
@@ -31,27 +32,30 @@ function Get-AudioChannels ([string] $video_path) {
 function Get-VideoWidth ([string] $video_path) {
     #check video width (1920 width is more consistant for 1080p videos)
     $video_width = $null 
+    Start-Sleep -Milliseconds 200 
     $video_width = (.\ffprobe.exe -loglevel quiet -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
     if (Select-String -pattern "N/A" -InputObject $video_width -quiet) { $video_width = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String }   
     $video_width = $video_width.trim()
     $video_width = $video_width.Split("")[0]
     if (Select-String -pattern "1920" -InputObject $video_width -quiet) { $video_width = "1920" }   
     try {  $video_width = [Int]$video_width }
-    catch { write-host "  $video.name width issue"}
+    catch { write-host "  "$video.name" width issue"}
     return $video_width
 }
 
 function Get-VideoDuration ([string] $video_path) {
     $video_duration = $null 
+    Start-Sleep -Milliseconds 200 
     $video_duration = (.\ffprobe.exe -loglevel quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
     $video_duration = $video_duration.trim()
     try { $video_duration = [int]$video_duration }
-    catch { write-host "  $video.name duation issue"}
+    catch { write-host "  "$video.name" duation issue"}
     return $video_duration
 }
 
-# not getting remainding seconds (as sometimes movie is shortened by a couple)
+
 function Get-VideoDurationFormatted ([string] $video_duration) {
+    # not getting remainding seconds (as sometimes movie is shortened by a couple)
     $video_duration_formated = $null
     $video_duration_formated = [timespan]::fromseconds($video_duration)
     $video_duration_formated = ("{0:hh\:mm}" -f $video_duration_formated)    
@@ -59,10 +63,8 @@ function Get-VideoDurationFormatted ([string] $video_duration) {
 }
 
 function Get-JobStatus ([string] $job) {
-    # Write-Host "Checking for any existing running jobs..." 
     if ( [bool](get-job -Name $job -ea silentlycontinue) ) {
         $state = (get-job -Name $job).State 
-        # if ($state -eq "Running") { Write-Host "$job Job - Please wait, job already exists and Running"  -ForegroundColor Yellow }
         return $state
     }
 }
@@ -74,7 +76,6 @@ function Start-Delay {
 }
 
 function Show-State() {
-    # $skiptotal_files = $skipped_files + $skippederror_files + $skippedhevc_files
     $skiptotal_count = $skipped_files.Count + $skippederror_files.Count + $skippedhevc_files.Count
     Write-Host "Previously processed files: $($skipped_files.Count)" 
     Write-Host "Previously errored files: $($skippederror_files.Count)" 
@@ -118,35 +119,30 @@ function Get-Videos() {
     # get-job -State Completed | Remove-Job
     get-job -Name Scan -ea silentlycontinue | Stop-Job -ea silentlycontinue | Out-Null  
     if (-not(test-path -PathType leaf $log_path\scan_results.csv) -or $scan_at_start -eq 1) { 
-        # Stop-Job Scan -ea silentlycontinue
         Write-Host  -NoNewline "Running file scan... " 
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null
         Receive-Job -name "Scan" -wait -Force
         Start-Sleep 2 
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
-        # $file_count = $videos.Count
         Write-Host " files: " $videos.Count
     }  
     elseif ($scan_at_start -eq 0) {
         
         Write-Host -NoNewline "Getting previous scan results & running new scan in background: " 
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
-        # $file_count = $videos.Count
         Write-Host $videos.Count
-        # Write-Host ""
         Start-Job -Name "Scan" -FilePath .\include\job_media_scan.ps1 -ArgumentList $RootDir | Out-Null 
     }
     elseif ($scan_at_start -eq 2) {
     
         Write-Host -NoNewline "Getting previous scan results: " 
         $videos = @(Import-Csv -Path $log_path\scan_results.csv -Encoding utf8)
-        # $file_count = $videos.Count
         Write-Host $videos.Count
-        # Write-Host "" 
     }
     return $videos
 }
 function Get-Skip() {
+    $skipped_files = $null
     if ((test-path -PathType leaf $log_path\skip.txt)) { 
         $mutexName = 'Get-Skip'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
@@ -157,11 +153,11 @@ function Get-Skip() {
         finally {
             $mutex.ReleaseMutex()
         }
-        # Write-Host "Unable to read from skip file"  
     }
     return $skipped_files
 }
 function Get-SkipError() {
+    $skippederror_files = $null
     if ((test-path -PathType leaf $log_path\skiperror.txt)) { 
         $mutexName = 'Get-SkipError'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
@@ -176,6 +172,7 @@ function Get-SkipError() {
     return $skippederror_files
 }
 function Get-SkipHEVC() {
+    $skippedhevc_files = $null
     if ((test-path -PathType leaf $log_path\skiphevc.txt)) { 
         $mutexName = 'Get-SkipHEVC'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
@@ -196,7 +193,9 @@ function Write-Log  ([string] $LogString) {
         $LogMessage = "$Stamp $env:computername$LogString"
         if ($LogString -like '*transcoding*') { Write-Host "$LogMessage" -ForegroundColor Cyan }
         elseif ($LogString -like '*ERROR*') { Write-Host "$LogMessage" -ForegroundColor Red }
-        elseif ($LogString -like '*Saved*') { Write-Host "$LogMessage" -ForegroundColor Green }
+        elseif ($LogString -like '*Saved:*') { Write-Host "$LogMessage" -ForegroundColor Green }
+        elseif ($LogString -like '*Saved:*') { Write-Host "$LogMessage" -ForegroundColor Green }
+        elseif ($LogString -like '*Converting HEVC to MP4 container*') { Write-Host "$LogMessage" -ForegroundColor DarkGreen }
         else { Write-Host "$LogMessage" }
         $mutexName = 'Write-Log'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
@@ -212,10 +211,6 @@ function Write-Log  ([string] $LogString) {
 function Write-Skip ([string] $video_name) {
     if ($video_name) { 
         $Logfile = "$log_path\skip.txt"
-        # if ($video_name -like '*null*') { 
-        #     Write-Host "$LogMessage" -ForegroundColor Red 
-        #     return
-        #     }
         $mutexName = 'Write-Skip'
         $mutex = New-Object 'Threading.Mutex' $false, $mutexName
         $check = $mutex.WaitOne() 
