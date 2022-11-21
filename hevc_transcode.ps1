@@ -86,6 +86,22 @@ Foreach ($video in $videos) {
                 $now = Get-Date
                 Get-Job -name GPU-* | Where-Object { $_.State -eq 'Running' -and (($now - $_.PSBeginTime).TotalMinutes -gt $ffmpeg_timeout) } | Stop-Job
 
+                # check for GPU driver issues 
+                $ErrorCheckTime = Get-Date
+                $ErrorCheckTime = $ErrorCheckTime.AddSeconds(-10)
+                $ErrorCheck = $null
+                $ErrorCheck = get-eventlog System -After $ErrorCheckTime | Where-Object { $_.EventID -eq 4101 }
+                if ($null -ne $ErrorCheck) {      
+                    Write-Host "  DETECTED DRIVER ISSUE IN LAST 10 SECONDS" -NoNewline
+                    Get-Job -name GPU-* | Stop-Job
+                    Write-Host " All Jobs killed. Restarting"
+                    for ($delay = 0; $delay -lt 11; $delay++) {
+                        Write-Host "." -NoNewline
+                        Start-Sleep 1
+                    }  
+                    
+                }
+
                 # If thread not running then i can run it here 
                 if ($gpu_state -ne "Running") {
                     if ($ffmpeg_hwdec -eq 1) { $hw = "DE" }
