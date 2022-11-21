@@ -176,7 +176,7 @@ if (test-path -PathType leaf "output\$video_new_name") {
         Start-delay
         try {
             Move-item -Path "output\$video_new_name" -destination "$video_new_path" -Force 
-            Remove-Item "$video_path"
+            if ($ffmpeg_mp4 -eq 1) {Remove-Item "$video_path"}
             Write-SkipHEVC $video_new_name
         }
         catch {
@@ -189,33 +189,11 @@ if (test-path -PathType leaf "output\$video_new_name") {
 
 Else {   
     if ($video_codec -eq "hevc") {
-        if ($ffmpeg_mp4 -eq 1 -AND ($video_path -ne $video_new_path)) {
-            Write-Log "$job - $video_name Converting HEVC to MP4 container..."
-            $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `"$video_path`" -vcodec copy -acodec copy -scodec mov_text -err_detect explode -max_muxing_queue_size 9999 `"output\$video_new_name`" "
-            # Write-Output $ffmpeg_params
-            try {Invoke-Expression $ffmpeg_params -ErrorVariable err 
-                Write-Log "$job - $video_new_name Converted"
-                Start-delay
-                try {
-                    Move-item -Path "output\$video_new_name" -destination "$video_new_path" -Force 
-                    Remove-Item "$video_path"
-                    Write-SkipHEVC $video_new_name
-                }
-                catch {
-                    Write-Log "Error moving $video_new_name back to source location - Check permissions"   
-                    Write-Log $_.exception.message 
-                }}
-            catch {
-                if ($err) { Write-Log "$job - $video_name $err" }
-                exit
-            }   
-        }
-        elseif ($ffmpeg_mp4 -eq 0 ) {
-            Write-Log  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already HEVC, Skipping"
-            Write-SkipHEVC $video_name
-            exit
-        }
+        Write-Log  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already HEVC, Skipping"
+        Write-SkipHEVC $video_name
+        exit
     }
+    
     else { 
         Write-Log "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED"
         Write-SkipError $video_name
