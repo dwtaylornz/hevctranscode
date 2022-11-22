@@ -2,7 +2,6 @@
 function Get-VideoCodec ([string] $video_path) {
     #Write-Host "Check if file is HEVC first..."
     $video_codec = $null
-    Start-Sleep -Milliseconds 200 
     $video_codec = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`")
     if (Select-String -pattern "hevc" -InputObject $video_codec -quiet) { $video_codec = "hevc" }
     if (Select-String -pattern "h264" -InputObject $video_codec -quiet) { $video_codec = "h264" } 
@@ -16,7 +15,6 @@ function Get-VideoCodec ([string] $video_path) {
 
 function Get-AudioCodec ([string] $video_path) {
     $audio_codec = $null
-    Start-Sleep -Milliseconds 200 
     $audio_codec = .\ffprobe.exe -v quiet -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
     # if (Select-String -pattern "dts" -InputObject $audio_codec -quiet) { $audio_codec = "dts" }
     return $audio_codec
@@ -24,7 +22,6 @@ function Get-AudioCodec ([string] $video_path) {
 
 function Get-AudioChannels ([string] $video_path) {
     $audio_channels = $null
-    Start-Sleep -Milliseconds 200 
     $audio_channels = .\ffprobe.exe -v quiet -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`"
     return $audio_channels
 }
@@ -32,7 +29,6 @@ function Get-AudioChannels ([string] $video_path) {
 function Get-VideoWidth ([string] $video_path) {
     #check video width (1920 width is more consistant for 1080p videos)
     $video_width = $null 
-    Start-Sleep -Milliseconds 200 
     $video_width = (.\ffprobe.exe -loglevel quiet -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String
     if (Select-String -pattern "N/A" -InputObject $video_width -quiet) { $video_width = (.\ffprobe.exe -v quiet -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1  "`"$video_path"`") | Out-String }   
     $video_width = $video_width.trim()
@@ -45,14 +41,12 @@ function Get-VideoWidth ([string] $video_path) {
 
 function Get-VideoDuration ([string] $video_path) {
     $video_duration = $null 
-    Start-Sleep -Milliseconds 200 
     $video_duration = (.\ffprobe.exe -loglevel quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "`"$video_path"`") | Out-String
     $video_duration = $video_duration.trim()
     try { $video_duration = [int]$video_duration }
     catch { write-host "  "$video.name" duation issue"}
     return $video_duration
 }
-
 
 function Get-VideoDurationFormatted ([string] $video_duration) {
     # not getting remainding seconds (as sometimes movie is shortened by a couple)

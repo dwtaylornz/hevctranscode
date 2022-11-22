@@ -92,14 +92,14 @@ Foreach ($video in $videos) {
                 $ErrorCheck = $null
                 $ErrorCheck = get-eventlog System -After $ErrorCheckTime | Where-Object { $_.EventID -eq 4101 }
                 if ($null -ne $ErrorCheck) {      
-                    Write-Host "  DETECTED DRIVER ISSUE IN LAST 10 SECONDS" -NoNewline
+                    Write-Host "  DETECTED DRIVER ISSUE IN LAST 10 SECONDS." -NoNewline
                     Get-Job -name GPU-* | Stop-Job
-                    Write-Host " All Jobs killed. Restarting"
+                    Write-Host " All Jobs killed. Restarting after delay" -NoNewline
                     for ($delay = 0; $delay -lt 11; $delay++) {
                         Write-Host "." -NoNewline
                         Start-Sleep 1
                     }  
-                    
+                    Write-Host "." 
                 }
 
                 # If thread not running then i can run it here 
