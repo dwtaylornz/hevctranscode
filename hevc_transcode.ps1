@@ -3,7 +3,6 @@
 #
 # script will loop through largest to smallest videos transcoding to HEVC
 # populate variables.ps1 before running this script. 
-# TODO - make it multi machine! 
 
 Set-Location $PSScriptRoot
 $RootDir = $PSScriptRoot
@@ -21,11 +20,15 @@ Write-Host ""
 # Setup temp output folder, and clear previous transcodes
 Initialize-Folders
 
+# Get Videos - run Scan job at $media_path or retrive videos from .\scan_results
+$videos = Get-Videos
+
 # run health check job 
 Invoke-HealthCheck
 
-# Get Videos - run Scan job at $media_path or retrive videos from .\scan_results
-$videos = Get-Videos
+# run color fix job
+if ($mkv_color_fix -eq 1){Invoke-ColorFix}
+
 
 # Get previously skipped files from skip.log
 $skipped_files = Get-Skip
@@ -88,14 +91,14 @@ Foreach ($video in $videos) {
 
                 # check for GPU driver issues 
                 $ErrorCheckTime = Get-Date
-                $ErrorCheckTime = $ErrorCheckTime.AddSeconds(-10)
+                $ErrorCheckTime = $ErrorCheckTime.AddSeconds(-25)
                 $ErrorCheck = $null
                 $ErrorCheck = get-eventlog System -After $ErrorCheckTime | Where-Object { $_.EventID -eq 4101 }
                 if ($null -ne $ErrorCheck) {      
-                    Write-Host "  DETECTED DRIVER ISSUE IN LAST 10 SECONDS." -NoNewline
+                    Write-Host "  DETECTED DRIVER ISSUE." -NoNewline
                     Get-Job -name GPU-* | Stop-Job
                     Write-Host " All Jobs killed. Restarting after delay" -NoNewline
-                    for ($delay = 0; $delay -lt 11; $delay++) {
+                    for ($delay = 0; $delay -lt 30 ; $delay++) {
                         Write-Host "." -NoNewline
                         Start-Sleep 1
                     }  

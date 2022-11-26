@@ -47,7 +47,8 @@ $start_time = (GET-Date)
 Write-Skip "$video_name"
 
 # GPU Offload...
-if ($video_codec -ne "hevc" ) {
+if ($video_codec -ne "hevc" -OR $video_codec -ne "av1") {
+        
     $transcode_msg = "transcoding to HEVC"
 
     # NVIDIA TUNING 
@@ -134,37 +135,37 @@ if (test-path -PathType leaf "output\$video_new_name") {
     # run checks, if ok then move... 
     if ($diff_percent -eq 100 -OR $video_new_size -eq 0) { 
         Write-Log "$job - $video_new_name ERROR, zero file size ($video_new_size`GB`), File - NOT copied" 
-        Start-sleep 1
+        # Start-sleep 1
         Remove-Item "output\$video_new_name"
         Write-SkipError "$video_name"
     }
     elseif ($diff_percent -lt $ffmpeg_min_diff ) {
         Write-Log "$job - $video_new_name ERROR, min difference not achieved ($diff_percent% < $ffmpeg_min_diff%) $video_size`GB -> $video_new_size`GB, File - NOT copied" 
-        Start-sleep 1
+        # Start-sleep 1
         Remove-Item "output\$video_new_name"
         Write-SkipError "$video_name"
     } 
     elseif ($diff_percent -gt $ffmpeg_max_diff ) {
         Write-Log "$job - $video_new_name ERROR, max difference not achieved ($diff_percent% > $ffmpeg_max_diff%) $video_size`GB -> $video_new_size`GB, File - NOT copied" 
-        Start-sleep 1
+        # Start-sleep 1
         Remove-Item "output\$video_new_name"
         Write-SkipError "$video_name"
     }        
     elseif ($video_new_duration -lt ($video_duration - 5) -OR $video_new_duration -gt ($video_duration + 5)) { 
         Write-Log "$job - $video_new_name ERROR, incorrect duration on new video ($video_duration -> $video_new_duration), File - NOT copied" 
-        Start-sleep 1
+        # Start-sleep 1
         Remove-Item "output\$video_new_name"
         Write-SkipError "$video_name"
     }
     elseif ($null -eq $video_new_videocodec) { 
         Write-Log "$job - $video_new_name ERROR, no video stream detected, File - NOT copied" 
-        Start-sleep 1
+        # Start-sleep 1
         Remove-Item "output\$video_new_name"
         Write-SkipError "$video_name"
     }
     elseif ($null -eq $video_new_audiocodec) { 
         Write-Log "$job - $video_new_name ERROR, no audio stream detected, File - NOT copied" 
-        Start-sleep 1
+        # Start-sleep 1
         Remove-Item "output\$video_new_name"
         Write-SkipError "$video_name"
     }
@@ -176,6 +177,15 @@ if (test-path -PathType leaf "output\$video_new_name") {
         if ($influx_address -AND $influx_db) { Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null } 
         Start-delay
         try {
+
+            if ($mkv_color_fix -eq 1){
+                $extension = Get-ChildItem output\$video_new_name | Select-Object Extension 
+                if ($extension.Extension -eq ".mkv") { 
+                    .\mkvpropedit.exe `"output\$video_new_name`" --edit track:v1 -d color-matrix-coefficients -d chroma-siting-horizontal -d chroma-siting-vertical -d color-transfer-characteristics -d color-range -d color-primaries --quiet | Out-Null
+                    Write-ColorFixed "$video_new_name"
+                    }
+            }
+            
             Move-item -Path "output\$video_new_name" -destination "$video_new_path" -Force 
             if ($ffmpeg_mp4 -eq 1) {Remove-Item "$video_path"}
             Write-SkipHEVC $video_new_name
@@ -194,6 +204,12 @@ Else {
         Write-SkipHEVC $video_name
         exit
     }
+
+    elseif ($video_codec -eq "av1") {
+        Write-Log  "$job - $video_name ($video_codec, $video_width, $video_size GB) Already AV1, Skipping"
+        Write-SkipHEVC $video_name
+        exit
+    }
     
     else { 
         Write-Log "$job - $video_name ($video_codec, $video_width, $video_size GB) ERROR or FAILED"
@@ -201,3 +217,6 @@ Else {
         exit
     }                                
 }     
+
+# $extension = Get-ChildItem $video_new_path | Select-Object Extension      
+# if ($extension.Extension -eq ".mkv") { .\mkvpropedit.exe $video_new_path --edit track:v1 -d color-matrix-coefficients -d chroma-siting-horizontal -d chroma-siting-vertical -d color-transfer-characteristics -d color-range -d color-primaries }

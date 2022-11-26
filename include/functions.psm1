@@ -108,6 +108,13 @@ function Invoke-HealthCheck() {
     }
 }
 
+function Invoke-ColorFix() {
+    if ($mkv_color_fix -eq 1) { 
+        Write-Host "Fixing color on mkv files..." 
+        Start-Job -Name "ColorFix" -FilePath .\include\job_color_fix.ps1 -ArgumentList $RootDir, $videos | Out-Null
+    }
+}
+
 # File stuff 
 function Get-Videos() {
     # get-job -State Completed | Remove-Job
@@ -165,6 +172,24 @@ function Get-SkipError() {
     }
     return $skippederror_files
 }
+
+function Get-ColorFixed() {
+    $colorfixed_files = $null
+    if ((test-path -PathType leaf $log_path\skipcolorfixed.txt)) { 
+        $mutexName = 'Get-ColorFixed'
+        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
+        $check = $mutex.WaitOne() 
+        try {
+            $colorfixed_files = @(Get-Content -Path $log_path\skipcolorfixed.txt -Encoding utf8 -ErrorAction Stop) 
+        }
+        finally {
+            $mutex.ReleaseMutex()
+        }      
+    }
+    return $colorfixed_files
+}
+
+
 function Get-SkipHEVC() {
     $skippedhevc_files = $null
     if ((test-path -PathType leaf $log_path\skiphevc.txt)) { 
@@ -232,6 +257,23 @@ function Write-SkipError ([string] $video_name) {
         }
     }
 }
+
+function Write-ColorFixed ([string] $video_name) {
+    if ($video_name) { 
+        $Logfile = "$log_path\skipcolorfixed.txt"
+        $mutexName = 'Write-ColorFixed'
+        $mutex = New-Object 'Threading.Mutex' $false, $mutexName
+        $check = $mutex.WaitOne() 
+        try {
+            Add-content $LogFile -value $video_name -Encoding utf8 -ErrorAction Stop
+            return 
+        }
+        finally {
+            $mutex.ReleaseMutex()
+        }
+    }
+}
+
 function Write-SkipHEVC ([string] $video_name) {
     if ($video_name) { 
         $Logfile = "$log_path\skiphevc.txt"
