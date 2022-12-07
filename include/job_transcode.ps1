@@ -177,15 +177,10 @@ if (test-path -PathType leaf "output\$video_new_name") {
         if ($influx_address -AND $influx_db) { Invoke-WebRequest "$influx_address/write?db=$influx_db" -Method POST -Body "gb_saved value=$diff" | Out-Null } 
         Start-delay
         try {
-
-            if ($mkv_color_fix -eq 1){
-                $extension = Get-ChildItem output\$video_new_name | Select-Object Extension 
-                if ($extension.Extension -eq ".mkv") { 
-                    .\mkvpropedit.exe `"output\$video_new_name`" --edit track:v1 -d color-matrix-coefficients -d chroma-siting-horizontal -d chroma-siting-vertical -d color-transfer-characteristics -d color-range -d color-primaries --quiet | Out-Null
-                    Write-ColorFixed "$video_new_name"
-                    }
-            }
-            
+            $extension = Get-ChildItem output\$video_new_name | Select-Object Extension 
+            if ($extension.Extension -eq ".mkv") { 
+                .\mkvpropedit.exe `"output\$video_new_name`" --edit track:v1 -d color-matrix-coefficients -d chroma-siting-horizontal -d chroma-siting-vertical -d color-transfer-characteristics -d color-range -d color-primaries --quiet | Out-Null
+                }                  
             Move-item -Path "output\$video_new_name" -destination "$video_new_path" -Force 
             if ($ffmpeg_mp4 -eq 1) {Remove-Item "$video_path"}
             Write-SkipHEVC $video_new_name
@@ -216,7 +211,5 @@ Else {
         Write-SkipError $video_name
         exit
     }                                
-}     
-
-# $extension = Get-ChildItem $video_new_path | Select-Object Extension      
-# if ($extension.Extension -eq ".mkv") { .\mkvpropedit.exe $video_new_path --edit track:v1 -d color-matrix-coefficients -d chroma-siting-horizontal -d chroma-siting-vertical -d color-transfer-characteristics -d color-range -d color-primaries }
+} 
+   

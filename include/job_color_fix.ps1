@@ -28,4 +28,4 @@ Foreach ($video in $videos) {
 
 }
 
-Write-Log "  All colour headers removed"
+Write-Log " - ColorFix complete on all files. Color headers removed!"
