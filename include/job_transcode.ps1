@@ -47,7 +47,7 @@ $start_time = (GET-Date)
 Write-Skip "$video_name"
 
 # GPU Offload...
-if ($video_codec -ne "hevc" -OR $video_codec -ne "av1") {
+if ($video_codec -ne "hevc" -AND $video_codec -ne "av1") {
         
     $transcode_msg = "transcoding to HEVC"
 
@@ -78,16 +78,13 @@ if ($video_codec -ne "hevc" -OR $video_codec -ne "av1") {
     if ($convert_1080p -eq 0) { $ffmpeg_scale_cmd = $null } 
     elseif ($convert_1080p -eq 1 -AND $video_width -gt 1920) { $ffmpeg_scale_cmd = "-vf scale=1920:-1" } 
 
-    if ($ffmpeg_crf -eq 28) { $ffmpeg_crf_cmd = "" }
-    else { $ffmpeg_crf_cmd = "-crf $ffmpeg_crf" }
-
     if ($ffmpeg_mp4 -eq 1) { $transcode_msg = "$transcode_msg MP4" }
 
     $transcode_msg = "$transcode_msg..."
     Write-Log "$job - $video_name ($video_codec, $audio_codec($audio_channels channel), $video_width, $video_size`GB`) $transcode_msg"      
  
     # Main FFMPEG Params 
-    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `"$video_path`" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -map 0:v -c:v $ffmpeg_codec $ffmpeg_codec_tune $ffmpeg_crf_cmd -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 `"output\$video_new_name`" "
+    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `"$video_path`" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -map 0:v -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -err_detect explode -max_muxing_queue_size 9999 `"output\$video_new_name`" "
     # Write-Host $ffmpeg_params
 
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
@@ -145,12 +142,12 @@ if (test-path -PathType leaf "output\$video_new_name") {
         Remove-Item "output\$video_new_name"
         Write-SkipError "$video_name"
     } 
-    elseif ($diff_percent -gt $ffmpeg_max_diff ) {
-        Write-Log "$job - $video_new_name ERROR, max difference not achieved ($diff_percent% > $ffmpeg_max_diff%) $video_size`GB -> $video_new_size`GB, File - NOT copied" 
-        # Start-sleep 1
-        Remove-Item "output\$video_new_name"
-        Write-SkipError "$video_name"
-    }        
+    # elseif ($diff_percent -gt $ffmpeg_max_diff ) {
+    #     Write-Log "$job - $video_new_name ERROR, max difference not achieved ($diff_percent% > $ffmpeg_max_diff%) $video_size`GB -> $video_new_size`GB, File - NOT copied" 
+    #     # Start-sleep 1
+    #     Remove-Item "output\$video_new_name"
+    #     Write-SkipError "$video_name"
+    # }        
     elseif ($video_new_duration -lt ($video_duration - 5) -OR $video_new_duration -gt ($video_duration + 5)) { 
         Write-Log "$job - $video_new_name ERROR, incorrect duration on new video ($video_duration -> $video_new_duration), File - NOT copied" 
         # Start-sleep 1
