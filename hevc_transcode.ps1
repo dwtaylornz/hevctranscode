@@ -1,4 +1,4 @@
-# powershell 
+#!/usr/bin/env powershell
 # github.com/dwtaylornz/hevctranscode
 #
 # script will loop through largest to smallest videos transcoding to HEVC
