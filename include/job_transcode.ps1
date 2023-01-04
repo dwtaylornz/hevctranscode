@@ -47,16 +47,14 @@ $start_time = (GET-Date)
 Write-Skip "$video_name"
 
 # GPU Offload...
-if ($video_codec -eq "h264") {
+if ($video_codec -ne "hevc" -AND $video_codec -ne "av1") {
         
     $transcode_msg = "transcoding to HEVC"
 
     # NVIDIA TUNING 
     # if ($ffmpeg_codec -eq "hevc_nvenc"){$ffmpeg_codec_tune = "-pix_fmt yuv420p10le -b:v 0 -rc:v vbr"}
     # AMD TUNING - 
-    # if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode idr" }
-    # try gops instead of idr header frames
-    if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -header_insertion_mode gop -gops_per_idr 1" }
+    if ($ffmpeg_codec -eq "hevc_amf") { $ffmpeg_codec_tune = "-usage transcoding -quality quality -profile_tier high -header_insertion_mode idr" }
     
     if ($ffmpeg_hwdec -eq 0) { $ffmpeg_dec_cmd = "" }
     elseif ($ffmpeg_hwdec -eq 1) { $ffmpeg_dec_cmd = "-hwaccel cuda -hwaccel_output_format cuda" }
@@ -86,12 +84,14 @@ if ($video_codec -eq "h264") {
     Write-Log "$job - $video_name ($video_codec, $audio_codec($audio_channels channel), $video_width, $video_size`GB`) $transcode_msg"      
  
     # Main FFMPEG Params 
-    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `"$video_path`" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -map 0:v -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -max_muxing_queue_size 9999 `"output\$video_new_name`" "
-    Write-Host $ffmpeg_params
+    # $ffmpeg_params = ".\ffmpeg.exe -hide_banner -xerror -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `"$video_path`" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -map 0:v -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -max_muxing_queue_size 9999 `"output\$video_new_name`" "
+    $ffmpeg_params = ".\ffmpeg.exe -hide_banner -err_detect ignore_err -ec guess_mvs+deblock+favor_inter -ignore_unknown -v $ffmpeg_logging -y $ffmpeg_dec_cmd -i `"$video_path`" $ffmpeg_scale_cmd -map $ffmpeg_eng_cmd -map 0:v -c:v $ffmpeg_codec $ffmpeg_codec_tune -c:a $ffmpeg_aac_cmd -c:s copy -max_muxing_queue_size 9999 `"output\$video_new_name`" "
+    #Write-Host $ffmpeg_params
 
     Invoke-Expression $ffmpeg_params -ErrorVariable err 
     if ($err) { 
-        Write-Log "$job - $video_name $err" 
+        Write-Log "$job - $video_name $err"
+        Write-SkipError "$video_name" 
         exit
     }
 

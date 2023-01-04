@@ -10,12 +10,12 @@ if ($RootDir -eq "") { $RootDir = $pwd }
 
 Import-Module ".\include\functions.psm1" -Force
 
+# Get-Variables
+. (Join-Path $RootDir variables.ps1)
+
 Write-Host ""
 Write-Log " Starting..."
 Write-Host ""
-
-# Get-Variables
-. (Join-Path $RootDir variables.ps1)
 
 # Setup temp output folder, and clear previous transcodes
 Initialize-Folders
@@ -120,7 +120,7 @@ Foreach ($video in $videos) {
         }
     }
 }
-Write-Log " ALL DONE - waiting for running jobs to finish then quiting"
+Write-Log " Queue complete, waiting for running jobs to finish then quiting"
 while (get-job -State Running -ea silentlycontinue) {
     Start-Sleep 1
     Receive-Job *
