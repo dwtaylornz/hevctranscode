@@ -1,4 +1,4 @@
-## Reduce your media disk consumption with HEVC!
+## Reduce your media disk consumption with AV1!
 A windows powershell script to re-encode media library videos to HEVC / H265 using ffmpeg on windows with GPU acceleration. 
 
 ### requirements
